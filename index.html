@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>멍톡 AI — 강아지 한국어 통역기</title>
+  <meta name="theme-color" content="#ff8a3d" />
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    :root{--bg:#fff8f1;--card:#ffffff;--text:#27221e;--muted:#776c64;--brand:#ff8a3d;--brand2:#ffcc80;--danger:#e94848;--ok:#2e9d67;--line:#f0dfd0;--shadow:0 12px 32px rgba(76,48,20,.12)}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#fff8f1,#fff);font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;color:var(--text)}
+    header{padding:22px 18px 8px;max-width:1080px;margin:auto}h1{margin:0;font-size:28px}p{line-height:1.55}.sub{color:var(--muted);margin:8px 0 0}.wrap{max-width:1080px;margin:auto;padding:14px 18px 40px;display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:var(--shadow)}.full{grid-column:1/-1}button,select,input{font:inherit}button{border:0;border-radius:16px;padding:12px 16px;background:var(--brand);color:#fff;font-weight:800;cursor:pointer}button.secondary{background:#fff;color:var(--text);border:1px solid var(--line)}button.danger{background:var(--danger)}button:disabled{opacity:.5;cursor:not-allowed}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.pill{display:inline-flex;padding:7px 11px;border-radius:999px;background:#fff3e7;border:1px solid var(--line);color:#6b4630;font-size:13px}.bigResult{font-size:24px;font-weight:900;margin:12px 0}.confidence{font-size:42px;font-weight:900;color:var(--brand)}canvas{width:100%;height:120px;background:#1f1b18;border-radius:18px}.bars{display:grid;gap:10px}.bar{display:grid;grid-template-columns:92px 1fr 44px;gap:8px;align-items:center;font-size:14px}.track{height:12px;border-radius:999px;background:#f2e5d8;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,var(--brand2),var(--brand));width:0}.notice{padding:12px;border-radius:16px;background:#fff3e7;border:1px solid #ffd7aa;color:#6f4222}.dangerBox{background:#fff0f0;border-color:#ffc9c9;color:#8b1e1e}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:grid;gap:6px}.field label{font-size:13px;color:var(--muted)}.field input,.field select{border:1px solid var(--line);border-radius:14px;padding:10px;background:#fff}video{width:100%;border-radius:18px;background:#151515;min-height:240px}.small{font-size:12px;color:var(--muted)}.log{max-height:240px;overflow:auto;display:grid;gap:8px}.logItem{border:1px solid var(--line);border-radius:16px;padding:10px;background:#fffdfb}.tabs{display:flex;gap:8px;margin-bottom:12px}.tab{background:#fff;color:var(--text);border:1px solid var(--line)}.tab.active{background:var(--brand);color:#fff}.hide{display:none}@media(max-width:820px){.wrap{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}h1{font-size:24px}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>🐶 멍톡 AI — 강아지 한국어 통역기</h1>
+  <p class="sub">마이크·카메라·상황 데이터를 바탕으로 강아지의 감정과 의도를 한국어로 추정하는 MVP 웹앱입니다.</p>
+</header>
+<main class="wrap">
+  <section class="card">
+    <div class="tabs">
+      <button class="tab active" data-tab="home">홈</button>
+      <button class="tab" data-tab="analyze">실시간 분석</button>
+      <button class="tab" data-tab="report">리포트</button>
+    </div>
+    <div id="home" class="page">
+      <h2>오늘 강아지 상태</h2>
+      <p class="notice">⚠️ 이 앱은 수의학적 진단이 아니라 행동·음성 기반 추정 도구입니다. 통증, 호흡 이상, 공격성 징후가 반복되면 수의사와 상담하세요.</p>
+      <div class="bigResult" id="todaySummary">아직 분석 기록이 없습니다.</div>
+      <div class="row"><button id="goAnalyze">원터치 시작</button><button class="secondary" id="demoBtn">데모 분석</button></div>
+      <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+      <h3>개발 범위</h3>
+      <span class="pill">Bark</span><span class="pill">Whine</span><span class="pill">Growl</span><span class="pill">Panting</span><span class="pill">피드백 학습</span><span class="pill">PDF 리포트</span>
+    </div>
+    <div id="analyze" class="page hide">
+      <h2>실시간 분석</h2>
+      <canvas id="wave" width="900" height="180"></canvas>
+      <p class="small">현재 MVP는 브라우저 Web Audio API의 RMS, 피치 추정, 에너지 변화, 소리 간격을 이용한 규칙+점수 기반 분류입니다. 실제 배포 시 TFLite 모델로 교체하세요.</p>
+      <div class="row"><button id="startBtn">마이크 시작</button><button id="stopBtn" class="danger" disabled>중지</button><button id="analyzeBtn" class="secondary">현재 소리 분석</button></div>
+      <div class="bigResult" id="sentence">“마이크를 시작하고 강아지 소리를 들려주세요.”</div>
+      <div>신뢰도 <span class="confidence" id="conf">0%</span></div>
+      <div id="risk" class="notice hide"></div>
+      <h3>후보 감정</h3><div class="bars" id="emotionBars"></div>
+      <h3>보호자 피드백</h3>
+      <div class="row"><button id="yesBtn" class="secondary">맞아요</button><button id="noBtn" class="secondary">아니에요</button><select id="actual"><option>배고픔</option><option>산책 요구</option><option>놀이 요청</option><option>불안</option><option>경계</option><option>공격성</option><option>통증 의심</option><option>행복</option><option>흥분</option></select></div>
+    </div>
+    <div id="report" class="page hide">
+      <h2>리포트</h2>
+      <div class="row"><button id="pdfBtn">PDF 저장</button><button class="secondary" id="clearBtn">기록 삭제</button></div>
+      <h3>분석 기록</h3><div class="log" id="log"></div>
+    </div>
+  </section>
+  <aside class="card">
+    <h2>카메라 / 상황 데이터</h2>
+    <video id="video" autoplay muted playsinline></video>
+    <div class="row" style="margin-top:10px"><button class="secondary" id="camBtn">카메라 켜기</button><button class="secondary" id="camStopBtn">카메라 끄기</button></div>
+    <p class="small">현재 카메라는 화면 표시와 상황 입력용입니다. 실제 귀·꼬리·자세 추정은 MediaPipe/YOLO/TFLite Vision 모델 연결 지점에 추가하세요.</p>
+    <div class="grid2">
+      <div class="field"><label>밥 시간 근접</label><select id="meal"><option value="0">아님</option><option value="1">가까움</option><option value="2">지남</option></select></div>
+      <div class="field"><label>산책 시간 근접</label><select id="walk"><option value="0">아님</option><option value="1">가까움</option><option value="2">지남</option></select></div>
+      <div class="field"><label>실내/실외</label><select id="place"><option>실내</option><option>실외</option></select></div>
+      <div class="field"><label>날씨/온도</label><select id="weather"><option>보통</option><option>더움</option><option>추움</option><option>비/천둥</option></select></div>
+      <div class="field"><label>보호자 위치</label><select id="owner"><option>근처</option><option>안 보임</option><option>외출 중</option></select></div>
+      <div class="field"><label>낯선 사람/소음</label><select id="noise"><option>없음</option><option>소음</option><option>낯선 사람</option></select></div>
+      <div class="field"><label>시선/자세</label><select id="pose"><option>보호자 응시</option><option>문 앞 대기</option><option>몸 경직</option><option>꼬리 흔듦</option><option>움직임 적음</option></select></div>
+      <div class="field"><label>개 이름</label><input id="dogName" placeholder="예: 뭉치" /></div>
+    </div>
+  </aside>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const emotions=['행복','흥분','놀이 요청','배고픔','산책 요구','불안','경계','공격성','통증 의심'];
+let audioCtx, analyser, micStream, data, raf, lastResult=null, camStream=null;
+const $=id=>document.getElementById(id);
+function switchTab(id){document.querySelectorAll('.page').forEach(p=>p.classList.add('hide'));$(id).classList.remove('hide');document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===id));renderLog();}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));$('goAnalyze').onclick=()=>switchTab('analyze');
+function initBars(){ $('emotionBars').innerHTML=emotions.map(e=>`<div class="bar"><span>${e}</span><div class="track"><div class="fill" id="bar-${e}"></div></div><b id="score-${e}">0</b></div>`).join(''); } initBars();
+async function startMic(){try{micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});audioCtx=new AudioContext();const src=audioCtx.createMediaStreamSource(micStream);analyser=audioCtx.createAnalyser();analyser.fftSize=2048;src.connect(analyser);data=new Uint8Array(analyser.fftSize);$('startBtn').disabled=true;$('stopBtn').disabled=false;draw();}catch(e){alert('마이크 권한이 필요합니다: '+e.message)}}
+function stopMic(){cancelAnimationFrame(raf);micStream?.getTracks().forEach(t=>t.stop());$('startBtn').disabled=false;$('stopBtn').disabled=true;}
+function draw(){const c=$('wave'),ctx=c.getContext('2d');analyser.getByteTimeDomainData(data);ctx.fillStyle='#1f1b18';ctx.fillRect(0,0,c.width,c.height);ctx.lineWidth=3;ctx.strokeStyle='#ffcc80';ctx.beginPath();for(let i=0;i<data.length;i++){const x=i/data.length*c.width,y=data[i]/255*c.height;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.stroke();raf=requestAnimationFrame(draw)}
+function features(){ if(!analyser) return {rms:.05,peak:.1,zcr:.02,pitch:250,activity:.1}; analyser.getByteTimeDomainData(data);let sum=0,peak=0,z=0;for(let i=0;i<data.length;i++){let v=(data[i]-128)/128;sum+=v*v;peak=Math.max(peak,Math.abs(v));if(i&&((data[i-1]-128)*(data[i]-128)<0))z++;}let rms=Math.sqrt(sum/data.length);let pitch=120+Math.min(650, z/data.length*22050/2);return {rms,peak,zcr:z/data.length,pitch,activity:Math.min(1,rms*8)}}
+function classifySound(f){if(f.rms>.18&&f.zcr>.08)return 'Bark'; if(f.rms>.13&&f.pitch<260)return 'Growl'; if(f.rms>.09&&f.pitch>420)return 'Whine'; if(f.rms>.07&&f.zcr>.13)return 'Panting'; if(f.rms>.04&&f.zcr>.1)return 'Sniff'; return 'Howl'}
+function scoreEmotion(sound,f){let s=Object.fromEntries(emotions.map(e=>[e,5]));let meal=+$('meal').value, walk=+$('walk').value, weather=$('weather').value, owner=$('owner').value, noise=$('noise').value, pose=$('pose').value;
+ if(sound==='Bark'){s['관심 요청']=0;s['놀이 요청']+=35;s['흥분']+=25;s['배고픔']+=meal*25;s['산책 요구']+=walk*25}
+ if(sound==='Whine'){s['불안']+=35;s['통증 의심']+=18;s['배고픔']+=meal*18}
+ if(sound==='Growl'){s['경계']+=40;s['공격성']+=28}
+ if(sound==='Panting'){s['흥분']+=25;s['불안']+=16;if(weather==='더움')s['불안']+=24}
+ if(sound==='Sniff'){s['산책 요구']+=20;s['놀이 요청']+=14}
+ if(owner!=='근처')s['불안']+=25; if(noise==='낯선 사람'){s['경계']+=30;s['공격성']+=18} if(noise==='소음')s['불안']+=18;
+ if(pose==='보호자 응시'){s['배고픔']+=meal*20;s['놀이 요청']+=15} if(pose==='문 앞 대기')s['산책 요구']+=35; if(pose==='몸 경직'){s['경계']+=25;s['공격성']+=18} if(pose==='꼬리 흔듦'){s['행복']+=30;s['흥분']+=20} if(pose==='움직임 적음'&&weather==='더움')s['통증 의심']+=16;
+ Object.keys(s).forEach(k=>s[k]=Math.max(0,Math.min(100,Math.round(s[k]+f.activity*12)))); return s;}
+function sentence(top, scores, sound){const name=$('dogName').value||'강아지';const map={ '배고픔':`“배고파요. 평소 밥 시간이 가까워졌거나 지난 것 같아요.”`, '놀이 요청':`“저랑 놀아주세요. 보호자의 관심을 바라는 신호일 수 있어요.”`, '산책 요구':`“밖에 나가고 싶어요. 문 앞 행동이나 산책 시간이 영향을 준 것 같아요.”`, '불안':`“조금 불안해요. 보호자가 안 보이거나 주변 소음이 원인일 수 있어요.”`, '경계':`“낯선 대상이 신경 쓰여요. 거리를 두고 안정시켜 주세요.”`, '공격성':`“지금은 예민할 수 있어요. 억지로 만지지 말고 안전거리를 유지하세요.”`, '통증 의심':`“몸이 불편할 수 있어요. 반복되면 수의사 상담을 권장해요.”`, '행복':`“기분이 좋아요. 편안하고 긍정적인 상태로 보여요.”`, '흥분':`“신나거나 에너지가 올라간 상태예요. 잠시 진정 시간을 줘도 좋아요.”`}; return map[top]||`${name}의 상태를 더 관찰해 주세요.`}
+function analyze(fake){const f=fake||features();const sound=fake?.sound||classifySound(f);const scores=scoreEmotion(sound,f);const top=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0];lastResult={time:new Date().toLocaleString('ko-KR'), sound, top:top[0], confidence:top[1], scores, text:sentence(top[0],scores,sound), feedback:null};renderResult(lastResult);saveResult(lastResult)}
+function renderResult(r){$('sentence').textContent=r.text;$('conf').textContent=r.confidence+'%';emotions.forEach(e=>{let v=r.scores[e]||0;$('bar-'+e).style.width=v+'%';$('score-'+e).textContent=v});let risky=['통증 의심','공격성','불안'].includes(r.top)&&r.confidence>=55;$('risk').classList.toggle('hide',!risky);$('risk').classList.toggle('dangerBox',risky);$('risk').textContent=risky?'⚠️ 위험 알림: '+r.top+' 가능성이 높습니다. 반복되면 환경을 분리하고 전문가 상담을 고려하세요.':''}
+function saveResult(r){let arr=JSON.parse(localStorage.meongtalk||'[]');arr.unshift(r);localStorage.meongtalk=JSON.stringify(arr.slice(0,100));updateSummary();renderLog()}
+function updateSummary(){let arr=JSON.parse(localStorage.meongtalk||'[]');if(!arr.length){$('todaySummary').textContent='아직 분석 기록이 없습니다.';return}let top=arr[0];$('todaySummary').textContent=`최근 상태: ${top.top} / ${top.confidence}% — ${top.text.replace(/[“”]/g,'')}`}
+function renderLog(){let arr=JSON.parse(localStorage.meongtalk||'[]');$('log').innerHTML=arr.length?arr.map(r=>`<div class="logItem"><b>${r.time}</b><br>소리: ${r.sound} / 감정: ${r.top} ${r.confidence}%<br>${r.text}<br><span class="small">피드백: ${r.feedback||'없음'}</span></div>`).join(''):'기록이 없습니다.'}
+function feedback(ok){if(!lastResult)return alert('먼저 분석을 해주세요.');let arr=JSON.parse(localStorage.meongtalk||'[]');if(arr[0]){arr[0].feedback=ok?'맞아요':'아니에요: 실제 '+$('actual').value;localStorage.meongtalk=JSON.stringify(arr)}renderLog();alert('피드백이 저장되었습니다. 개인화 모델 학습 데이터로 사용할 수 있습니다.')} 
+async function camera(on){if(on){try{camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});$('video').srcObject=camStream}catch(e){alert('카메라 권한이 필요합니다: '+e.message)}}else{camStream?.getTracks().forEach(t=>t.stop());$('video').srcObject=null}}
+function makePdf(){const {jsPDF}=window.jspdf;let doc=new jsPDF();let arr=JSON.parse(localStorage.meongtalk||'[]');doc.setFontSize(18);doc.text('MeongTalk AI Daily Report',14,18);doc.setFontSize(10);doc.text('This app is not a veterinary diagnosis. It is an audio/behavior-based estimation tool.',14,26);let y=38;arr.slice(0,12).forEach((r,i)=>{doc.text(`${i+1}. ${r.time} | ${r.sound} | ${r.top} ${r.confidence}%`,14,y);y+=7;doc.text((r.text||'').replace(/[“”]/g,'').slice(0,80),14,y);y+=10;if(y>280){doc.addPage();y=18}});doc.save('meongtalk-ai-report.pdf')}
+$('startBtn').onclick=startMic;$('stopBtn').onclick=stopMic;$('analyzeBtn').onclick=()=>analyze();$('yesBtn').onclick=()=>feedback(true);$('noBtn').onclick=()=>feedback(false);$('camBtn').onclick=()=>camera(true);$('camStopBtn').onclick=()=>camera(false);$('pdfBtn').onclick=makePdf;$('clearBtn').onclick=()=>{localStorage.removeItem('meongtalk');updateSummary();renderLog()};$('demoBtn').onclick=()=>{switchTab('analyze');analyze({rms:.22,peak:.5,zcr:.11,pitch:330,activity:.8,sound:'Bark'})};updateSummary();renderLog();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body>
+</html>
