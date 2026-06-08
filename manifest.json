@@ -3,7 +3,7 @@
   "short_name": "멍톡AI",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#07101f",
+  "background_color": "#fff8f1",
   "theme_color": "#79c7ff",
   "icons": [
     {
