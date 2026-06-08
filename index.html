@@ -1,395 +1,91 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#fff4f8">
-<title>멍톡 AI — 강아지 통역기</title>
-<link rel="manifest" href="manifest.json">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#fff4f8" />
+<title>멍톡 AI — 강아지 음성 패턴 통역기</title>
+<link rel="manifest" href="manifest.json" />
 <style>
-:root{
-  --bg:#fff8f5; --panel:#ffffff; --panel2:#fff0f6; --line:#f5d5df;
-  --text:#2a2020; --muted:#8d7378; --hot:#ff6382; --pink:#ffd8e5;
-  --peach:#ffd2a6; --cream:#fff5dd; --mint:#c9f4df; --purple:#e8d7ff;
-  --shadow:0 14px 35px rgba(226,116,142,.16);
-  --safe-bottom:env(safe-area-inset-bottom,0px);
-  --safe-top:env(safe-area-inset-top,0px);
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%;background:linear-gradient(180deg,#fff4f8 0%,#fffaf3 45%,#fef7ff 100%);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',Segoe UI,sans-serif;}
-body{overflow-x:hidden}.app{width:min(100%,480px);margin:0 auto;min-height:100dvh;padding-bottom:calc(86px + var(--safe-bottom));}
-.topbar{position:sticky;top:0;z-index:20;padding:calc(10px + var(--safe-top)) 16px 10px;background:rgba(255,248,250,.88);backdrop-filter:blur(18px);border-bottom:1px solid rgba(245,213,223,.8)}
-.brand{display:flex;align-items:center;gap:12px}.logo{width:52px;height:52px;border-radius:18px;background:linear-gradient(135deg,#ffb28e,#ffe27d 55%,#bdf3d8);display:grid;place-items:center;font-size:31px;box-shadow:0 9px 18px rgba(255,137,162,.24)}
-.brand h1{font-size:21px;line-height:1;margin:0;font-weight:1000;letter-spacing:-.7px}.brand p{margin:5px 0 0;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}.owner-chip{margin-left:auto;border:1px solid #f0cad5;background:#fff8fb;border-radius:999px;padding:8px 10px;font-size:12px;color:#714c55;font-weight:800;white-space:nowrap}
-main{padding:14px 14px 0}.section{display:none;animation:rise .25s ease}.section.active{display:block}@keyframes rise{from{opacity:.45;transform:translateY(8px)}to{opacity:1;transform:none}}
-.card{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);padding:16px;margin-bottom:13px;overflow:hidden}.card h2{margin:0 0 12px;font-size:17px;letter-spacing:-.5px;display:flex;align-items:center;gap:6px}.small{font-size:12px;color:var(--muted);line-height:1.55}.muted{color:var(--muted)}
-.hero-card{background:linear-gradient(135deg,#fff,#fff0f7 55%,#fff6dd);position:relative}.hero-card:after{content:'💕';position:absolute;right:18px;bottom:16px;font-size:32px;opacity:.35}.profile-row{display:flex;align-items:center;gap:14px}.avatar{width:86px;height:86px;border-radius:32px;background:linear-gradient(135deg,#fff2e5,#ffe5ee);display:grid;place-items:center;font-size:47px;border:1px solid #ffd9e2;box-shadow:0 10px 22px rgba(230,117,145,.14)}.profile-name{font-size:23px;font-weight:1000;margin:0}.profile-meta{font-size:13px;color:#7f6469;margin:6px 0 12px}.mood-pill{display:inline-flex;align-items:center;gap:8px;background:#fff5f8;border:1px solid #ffd9e2;border-radius:999px;padding:8px 11px;color:#d94264;font-weight:900;font-size:13px}
-.speech-card{background:linear-gradient(160deg,#fff,#fff1f6);}.status-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.live{background:#ffe8ef;color:#f23b69;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:1000}.bubble{position:relative;border-radius:28px;background:linear-gradient(135deg,#fff7fa,#ffeef4);border:1px solid #ffd2de;padding:20px 18px;margin-top:8px;text-align:center}.bubble:before{content:'“';position:absolute;left:18px;top:8px;color:#ff9ab0;font-size:44px;font-weight:1000;opacity:.65}.bubble:after{content:'”';position:absolute;right:18px;bottom:0;color:#ff9ab0;font-size:44px;font-weight:1000;opacity:.65}.sentence{font-size:27px;line-height:1.35;font-weight:1000;color:#ed4665;letter-spacing:-1.1px;white-space:pre-wrap;padding:10px 18px}.confidence{text-align:right;font-size:13px;font-weight:900;color:#664e54;margin-top:6px}.quick-say{display:flex;gap:8px;overflow:auto;padding:10px 0 2px;scrollbar-width:none}.quick-say span{flex:0 0 auto;background:#fff3f6;border:1px solid #ffd6e0;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800;color:#7b4d58}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}.emotion-big{display:flex;align-items:center;gap:13px;background:linear-gradient(135deg,#fff1f6,#fff9e7);border-radius:23px;padding:15px;border:1px solid #ffd6e0}.emoji-big{width:64px;height:64px;border-radius:22px;background:linear-gradient(135deg,#ffd76e,#fff4ad);display:grid;place-items:center;font-size:38px;border:1px solid #ffc762}.emotion-name{font-size:22px;color:#e24162;font-weight:1000}.emotion-conf{font-size:14px;color:#e24162;font-weight:900;margin-top:2px}.mini-emotions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.emo{border:1px solid #f3d4dc;border-radius:18px;background:#fff;min-height:64px;display:grid;place-items:center;padding:8px 4px;font-size:11px;text-align:center;color:#634d52}.emo b{font-size:22px;display:block}.emo.hot{background:#fff0f5;border-color:#ffbfd0;color:#e24162}
-.behavior-list{display:grid;gap:8px}.behavior-list .item{display:flex;align-items:center;justify-content:space-between;background:#fff8fa;border:1px solid #f6dbe3;border-radius:16px;padding:10px 12px;font-size:13px}.tag{background:#ffe7ee;color:#e24162;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:900}.tag.soft{background:#fff0dc;color:#b56c2b}.tag.mint{background:#e6fff3;color:#258e67}.notice{border-radius:18px;background:#f0fff8;border:1px solid #bfeeda;color:#267657;padding:12px;font-weight:800;font-size:13px}.notice.warn{background:#fff4e8;border-color:#ffd1a9;color:#a9571e}.notice.danger{background:#fff0f2;border-color:#ffb5c0;color:#c72e4b}
-.canvas-wrap{height:205px;border-radius:22px;background:linear-gradient(180deg,#fff7fb,#fff2d9);border:1px solid #ffd6df;overflow:hidden;position:relative}canvas{width:100%;height:100%;display:block}.axis-label{position:absolute;left:12px;bottom:10px;font-size:11px;color:#80646b;background:rgba(255,255,255,.72);padding:4px 7px;border-radius:999px}.axis-label.right{left:auto;right:12px}.freq-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.info-box{background:#fff3f6;border:1px solid #ffd5df;border-radius:17px;padding:10px;font-size:12px}.info-box b{display:block;color:#e24162;font-size:15px;margin-top:4px}.voice-correction{margin-top:10px;background:#fff8fa;border:1px solid #ffd5df;border-radius:18px;padding:10px;display:grid;gap:8px}.voice-correction .vc-head{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:1000;color:#654d54}.voice-correction .vc-note{font-size:11px;color:#8d7378;line-height:1.45}.voice-correction .vc-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.voice-correction .vc-pill{background:#fff;border:1px solid #f5d5df;border-radius:14px;padding:8px}.voice-correction .vc-pill span{display:flex;justify-content:space-between;font-size:10.5px;font-weight:1000;color:#6b5058;margin-bottom:5px}.voice-correction .vc-bar{height:7px;background:#ffe8ef;border-radius:999px;overflow:hidden}.voice-correction .vc-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#ff7c98,#ffd076)}.video-wrap{position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(135deg,#fff1f6,#f6fff8);border:1px solid #ffd3de;aspect-ratio:4/3;display:grid;place-items:center}video{width:100%;height:100%;object-fit:cover}.camera-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none}.inline-voice{margin-top:12px}.inline-voice .canvas-wrap{height:150px}.inline-voice .freq-info{grid-template-columns:1fr 1fr}.camera-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:#80646b;font-weight:800;background:linear-gradient(135deg,#fff7fa,#fff9e8)}.rec{position:absolute;right:12px;top:12px;background:rgba(255,255,255,.9);border-radius:999px;padding:6px 9px;color:#ed4665;font-size:12px;font-weight:1000}.dog-detect-box{position:absolute;left:13%;top:15%;width:62%;height:58%;border:3px solid rgba(255,117,143,.85);border-radius:26px;box-shadow:0 0 0 999px rgba(20,20,20,.08);pointer-events:none;display:none}.dog-detect-label{position:absolute;left:12px;top:-33px;background:rgba(255,255,255,.94);border:1px solid #ffd1de;border-radius:999px;padding:7px 10px;color:#e24162;font-size:12px;font-weight:1000;white-space:nowrap}.camera-overlay{position:absolute;left:10px;right:10px;bottom:10px;display:none;grid-template-columns:1fr 1fr;gap:7px}.metric-pill{background:rgba(255,255,255,.9);border:1px solid #ffd5df;border-radius:14px;padding:7px 8px;box-shadow:0 6px 14px rgba(90,45,55,.08)}.metric-pill span{display:flex;justify-content:space-between;gap:6px;font-size:10.5px;font-weight:1000;color:#6b5058;margin-bottom:5px}.metric-bar{height:7px;border-radius:999px;background:#ffe8ef;overflow:hidden}.metric-bar i{display:block;height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#ff7c98,#ffbd77)}.camera-pro-panel{display:grid;gap:9px}.pro-row{background:#fff8fa;border:1px solid #f6dbe3;border-radius:16px;padding:10px 12px}.pro-row .top{display:flex;justify-content:space-between;font-size:12px;font-weight:1000;color:#634d52;margin-bottom:7px}.probar{height:9px;border-radius:999px;background:#ffe8ef;overflow:hidden}.probar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#ff7c98,#ffd076)}.cam-actions{display:flex;gap:8px;margin-top:10px}.btn,.btn2{border:0;border-radius:18px;padding:13px 14px;font-weight:1000;font-size:15px;cursor:pointer}.btn{background:linear-gradient(135deg,#ff758f,#ffb36b);color:white;box-shadow:0 12px 24px rgba(255,117,143,.28)}.btn2{background:#fff;border:1px solid #f2ccd5;color:#764f58}.wide{width:100%}.btn-row{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px}.timer{text-align:center;color:#fff;font-weight:1000;margin-top:4px;font-size:14px}.control-card{background:linear-gradient(135deg,#ff7a91,#ffb26f);color:white}.control-card h2{color:white}.control-card .small{color:rgba(255,255,255,.88)}
-.form{display:grid;gap:10px}.field label{display:block;font-size:12px;font-weight:900;color:#7d5c64;margin:0 0 5px}input,select{width:100%;border:1px solid #efd1d9;background:#fff;border-radius:15px;padding:12px 12px;font-size:15px;color:#2a2020;outline:none}input:focus,select:focus{border-color:#ff7b98;box-shadow:0 0 0 3px rgba(255,123,152,.14)}.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{background:#fff3f6;border:1px solid #ffd3df;border-radius:999px;padding:8px 10px;font-size:12px;color:#704d56;font-weight:800}.log-list{display:grid;gap:8px}.log-item{display:flex;gap:9px;align-items:flex-start;background:#fff8fa;border:1px solid #f6dbe3;border-radius:18px;padding:10px}.log-icon{width:36px;height:36px;border-radius:14px;display:grid;place-items:center;background:#fff0f5;border:1px solid #ffd0dd;font-size:19px}.log-text{font-size:13px;font-weight:900;line-height:1.35}.log-time{font-size:11px;color:#8d7378;margin-top:3px}.empty{padding:18px;text-align:center;color:#8d7378;font-weight:800;background:#fff8fa;border:1px dashed #f3ccd6;border-radius:18px}.bottom-nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:30;width:min(100%,480px);padding:9px 9px calc(9px + var(--safe-bottom));background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border-top:1px solid #f2d1da;box-shadow:0 -12px 30px rgba(184,96,117,.13);display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.nav-btn{border:0;background:transparent;border-radius:18px;padding:8px 3px;color:#85666e;font-weight:900;font-size:10.5px;display:grid;gap:3px;place-items:center}.nav-btn i{font-style:normal;font-size:21px}.nav-btn.active{background:#ffe8ef;color:#e24162}.hidden-tech{display:none!important}.footer-note{font-size:11px;line-height:1.55;color:#91777d;background:#fff8fa;border:1px solid #f4d8df;border-radius:18px;padding:12px;margin-bottom:12px}
-@media (min-width:900px){.app{max-width:1180px}.topbar{border-radius:0}.desktop-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.desktop-grid>.card{margin-bottom:0}.desktop-wide{grid-column:1/-1}main{padding:18px}.section.active#home{display:block}.bottom-nav{max-width:1180px}.brand p{max-width:none}}
-
-/* ===== 반응형 최적화: 바 타입 모바일 / 폴드·태블릿 / 데스크톱 ===== */
-@media (max-width:390px){
-  .app{width:100%;padding-bottom:calc(78px + var(--safe-bottom));}
-  .topbar{padding-left:12px;padding-right:12px}.logo{width:46px;height:46px;border-radius:16px;font-size:28px}
-  .brand h1{font-size:19px}.brand p{max-width:210px;font-size:11px}.owner-chip{padding:7px 8px;font-size:11px}
-  main{padding:11px 10px 0}.card{border-radius:22px;padding:13px;margin-bottom:11px}.avatar{width:72px;height:72px;border-radius:26px;font-size:40px}
-  .profile-name{font-size:20px}.sentence{font-size:22px;padding:8px 10px}.mini-emotions{grid-template-columns:repeat(3,1fr);gap:6px}.emo{min-height:58px;font-size:10px}.emo b{font-size:20px}
-  .btn-row{grid-template-columns:1fr}.btn,.btn2{min-height:46px}.canvas-wrap{height:178px}.camera-overlay{grid-template-columns:1fr}.metric-pill:nth-child(n+3){display:none}.bottom-nav{padding-left:6px;padding-right:6px}.nav-btn{border-radius:15px;font-size:10px}.nav-btn i{font-size:19px}
-}
-@media (min-width:391px) and (max-width:599px){
-  .app{width:min(100%,480px)}
-  .card{margin-bottom:13px}.video-wrap{aspect-ratio:4/3}.canvas-wrap{height:205px}
-}
-@media (min-width:600px) and (max-width:899px){
-  .app{width:min(100%,820px);padding-bottom:calc(88px + var(--safe-bottom));}
-  main{padding:18px}.brand p{max-width:520px}.section.active{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}.section.active>.card,.section.active>.footer-note{margin-bottom:0}.section.active>.footer-note{grid-column:1/-1}
-  #home .speech-card,#home .control-card,#translate .speech-card,#camera .card:first-child,#voice .card:first-child,#history .card:first-child{grid-column:1/-1}
-  .desktop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.desktop-grid>.card{margin-bottom:0}.desktop-wide{grid-column:1/-1}
-  .video-wrap{aspect-ratio:16/10}.canvas-wrap{height:230px}.sentence{font-size:29px}.mini-emotions{grid-template-columns:repeat(4,1fr)}
-  .bottom-nav{width:min(100%,820px);border-radius:26px 26px 0 0;padding-left:18px;padding-right:18px}.nav-btn{font-size:11.5px}.nav-btn i{font-size:22px}
-}
-@media (min-width:900px){
-  .app{width:min(100%,1220px);max-width:1220px;padding-bottom:26px;}
-  .topbar{left:0;right:0;border-radius:0}.brand p{max-width:none}.owner-chip{font-size:13px}
-  main{padding:22px 22px 22px 116px}.section.active{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:start}.section.active>.card{margin-bottom:0}
-  #home .hero-card{grid-column:span 4}#home .speech-card{grid-column:span 8}#home .control-card{grid-column:span 4}#home .card:nth-of-type(4){grid-column:span 4}#home .card:nth-of-type(5){grid-column:span 4}#home .card:nth-of-type(6){grid-column:span 6}#home .card:nth-of-type(7){grid-column:span 6}
-  #translate .speech-card{grid-column:span 7}#translate .card:nth-child(2){grid-column:span 5}#translate .card:nth-child(3){grid-column:span 12}
-  #camera .card:first-child{grid-column:span 7}#camera .card:nth-child(2){grid-column:span 5}#camera .card:nth-child(3){grid-column:span 5}
-  #voice .card:first-child{grid-column:span 8}#voice .card:nth-child(2){grid-column:span 4}
-  #history .card:first-child{grid-column:span 8}#history .card:nth-child(2){grid-column:span 4}
-  #settings .card{grid-column:span 6}#settings .footer-note{grid-column:1/-1}
-  .desktop-grid{display:contents}.desktop-grid>.card{margin-bottom:0}.desktop-wide{grid-column:auto}
-  .video-wrap{aspect-ratio:16/10}.canvas-wrap{height:250px}.sentence{font-size:31px}.mini-emotions{grid-template-columns:repeat(4,1fr)}
-  .bottom-nav{left:calc(50% - min(50vw,610px) + 18px);top:104px;bottom:auto;transform:none;width:82px;display:grid;grid-template-columns:1fr;gap:8px;padding:10px;background:rgba(255,255,255,.88);border:1px solid #f2d1da;border-radius:28px;box-shadow:0 16px 36px rgba(184,96,117,.16)}
-  .nav-btn{min-height:66px;border-radius:20px;font-size:11px}.nav-btn i{font-size:24px}
-}
-@media (min-width:1280px){
-  .app{width:min(100%,1320px);max-width:1320px}main{padding-left:124px}.canvas-wrap{height:280px}.video-wrap{aspect-ratio:16/9}.bottom-nav{left:calc(50% - min(50vw,660px) + 18px)}
-}
-@media (orientation:landscape) and (max-height:520px){
-  .topbar{position:relative}.bottom-nav{position:fixed}.app{padding-bottom:calc(76px + var(--safe-bottom));}.card{padding:12px}.canvas-wrap{height:165px}.video-wrap{aspect-ratio:16/9}.sentence{font-size:22px}
-}
-
-
-/* bottom navigation optimized for the current 4-card structure */
-.bottom-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
-.nav-btn{min-width:0;text-align:center;}
-@media (min-width:1100px){.bottom-nav{grid-template-columns:1fr!important;}}
-
-/* ===== 2026-06 responsive + camera tracking fix ===== */
-@media (min-width:900px){
-  main{max-width:1180px;margin:0 auto;padding:22px 22px 22px 116px;}
-  #camera .card:first-child{grid-column:span 8!important}
-  #camera .card:nth-child(2){grid-column:span 4!important}
-  #camera .card:nth-child(3){grid-column:span 12!important}
-  #translate .speech-card{grid-column:span 8!important}
-  #translate .card:nth-child(2){grid-column:span 4!important}
-  .camera-overlay{grid-template-columns:repeat(4,minmax(0,1fr));}
-  .metric-pill{min-width:0}
-}
-@media (min-width:1280px){
-  main{max-width:1240px;}
-  #home .speech-card{grid-column:span 8!important}
-  #home .hero-card{grid-column:span 4!important}
-}
-.camera-tech-badge{position:absolute;left:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap;z-index:3}
-.camera-tech-badge span{background:rgba(255,255,255,.92);border:1px solid #ffd5df;border-radius:999px;padding:6px 8px;color:#6b5058;font-size:10.5px;font-weight:1000;box-shadow:0 5px 13px rgba(90,45,55,.08)}
-.camera-overlay{z-index:4}.camera-canvas{z-index:2}.dog-detect-box{z-index:3}.rec{z-index:5}.camera-empty{z-index:1}
-
-.personality-lab{background:linear-gradient(135deg,#fff8fb,#fff6df);border:1px solid #ffd5df;border-radius:20px;padding:12px;margin-top:10px;display:grid;gap:10px}
-.personality-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.personality-box{background:#fff;border:1px solid #f5d5df;border-radius:16px;padding:10px}
-.personality-box strong{display:block;font-size:12px;color:#6b5058;margin-bottom:4px}
-.personality-box b{font-size:20px;color:#e24162}
-.bias-flow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin-top:8px}
-.bias-card{background:#fff;border:1px solid #f5d5df;border-radius:16px;padding:10px;text-align:center;min-height:70px}
-.bias-card span{display:block;font-size:11px;color:#8d7378;font-weight:800}.bias-card b{display:block;font-size:15px;color:#e24162;margin-top:5px}.bias-arrow{font-size:22px;color:#ff8da5;font-weight:1000}
-.correction-meter{height:10px;background:#ffe8ef;border-radius:999px;overflow:hidden}.correction-meter i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#ff7c98,#ffd076)}
-.test-buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.test-buttons button{font-size:12px;padding:10px;border-radius:14px}
-@media(max-width:420px){.bias-flow{grid-template-columns:1fr}.bias-arrow{transform:rotate(90deg);text-align:center}.personality-row,.test-buttons{grid-template-columns:1fr}}
-
+:root{--bg:#fff8f5;--panel:#fff;--line:#f5d5df;--text:#2a2020;--muted:#8d7378;--hot:#ff6382;--shadow:0 14px 35px rgba(226,116,142,.16);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;min-height:100dvh;background:linear-gradient(180deg,#fff4f8 0%,#fffaf3 45%,#fef7ff 100%);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',Segoe UI,sans-serif;overflow-x:hidden}.app{width:min(100%,900px);margin:0 auto;min-height:100dvh;padding-bottom:calc(86px + var(--safe-bottom))}.topbar{position:sticky;top:0;z-index:20;padding:calc(10px + var(--safe-top)) 16px 10px;background:rgba(255,248,250,.9);backdrop-filter:blur(18px);border-bottom:1px solid rgba(245,213,223,.8)}.brand{display:flex;align-items:center;gap:12px}.logo{width:52px;height:52px;border-radius:18px;background:linear-gradient(135deg,#ffb28e,#ffe27d 55%,#bdf3d8);display:grid;place-items:center;font-size:31px;box-shadow:0 9px 18px rgba(255,137,162,.24)}h1{font-size:21px;line-height:1;margin:0;font-weight:1000;letter-spacing:-.7px}.brand p{margin:5px 0 0;color:var(--muted);font-size:12px}.owner-chip{margin-left:auto;border:1px solid #f0cad5;background:#fff8fb;border-radius:999px;padding:8px 10px;font-size:12px;color:#714c55;font-weight:800;white-space:nowrap}main{padding:14px}.section{display:none;animation:rise .22s ease}.section.active{display:block}@keyframes rise{from{opacity:.5;transform:translateY(8px)}to{opacity:1;transform:none}}.card{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);padding:16px;margin-bottom:13px;overflow:hidden}.card h2{margin:0 0 12px;font-size:17px;letter-spacing:-.5px;display:flex;align-items:center;gap:6px}.small{font-size:12px;color:var(--muted);line-height:1.55}.profile-row{display:flex;align-items:center;gap:14px}.avatar{width:84px;height:84px;border-radius:30px;background:linear-gradient(135deg,#fff2e5,#ffe5ee);display:grid;place-items:center;font-size:46px;border:1px solid #ffd9e2}.profile-name{font-size:23px;font-weight:1000;margin:0}.profile-meta{font-size:13px;color:#7f6469;margin:6px 0 12px}.mood-pill,.live,.tag{display:inline-flex;align-items:center;gap:6px;background:#ffe8ef;color:#e24162;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:1000}.status-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.bubble{position:relative;border-radius:28px;background:linear-gradient(135deg,#fff7fa,#ffeef4);border:1px solid #ffd2de;padding:20px 18px;margin-top:8px;text-align:center}.sentence{font-size:27px;line-height:1.35;font-weight:1000;color:#ed4665;letter-spacing:-1px;white-space:pre-wrap;padding:10px 8px}.confidence{text-align:right;font-size:13px;font-weight:900;color:#664e54;margin-top:6px}.quick-say{display:flex;gap:8px;overflow:auto;padding:10px 0 2px}.quick-say span{flex:0 0 auto;background:#fff3f6;border:1px solid #ffd6e0;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800;color:#7b4d58}.emotion-big{display:flex;align-items:center;gap:13px;background:linear-gradient(135deg,#fff1f6,#fff9e7);border-radius:23px;padding:15px;border:1px solid #ffd6e0}.emoji-big{width:64px;height:64px;border-radius:22px;background:linear-gradient(135deg,#ffd76e,#fff4ad);display:grid;place-items:center;font-size:38px;border:1px solid #ffc762}.emotion-name{font-size:22px;color:#e24162;font-weight:1000}.emotion-conf{font-size:14px;color:#e24162;font-weight:900;margin-top:2px}.mini-emotions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.emo{border:1px solid #f3d4dc;border-radius:18px;background:#fff;min-height:64px;display:grid;place-items:center;padding:8px 4px;font-size:11px;text-align:center;color:#634d52}.emo b{font-size:22px;display:block}.emo.hot{background:#fff0f5;border-color:#ffbfd0;color:#e24162}.canvas-wrap{height:205px;border-radius:22px;background:linear-gradient(180deg,#fff7fb,#fff2d9);border:1px solid #ffd6df;overflow:hidden;position:relative}canvas{width:100%;height:100%;display:block}.axis-label{position:absolute;left:12px;bottom:10px;font-size:11px;color:#80646b;background:rgba(255,255,255,.72);padding:4px 7px;border-radius:999px}.axis-label.right{left:auto;right:12px}.freq-info,.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.info-box{background:#fff3f6;border:1px solid #ffd5df;border-radius:17px;padding:10px;font-size:12px}.info-box b{display:block;color:#e24162;font-size:15px;margin-top:4px}.voice-correction{margin-top:10px;background:#fff8fa;border:1px solid #ffd5df;border-radius:18px;padding:10px;display:grid;gap:8px}.vc-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.vc-pill{background:#fff;border:1px solid #f5d5df;border-radius:14px;padding:8px}.vc-pill span{display:flex;justify-content:space-between;font-size:10.5px;font-weight:1000;color:#6b5058;margin-bottom:5px}.vc-bar{height:7px;background:#ffe8ef;border-radius:999px;overflow:hidden}.vc-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#ff7c98,#ffd076)}.behavior-list{display:grid;gap:8px}.behavior-list .item{display:flex;align-items:center;justify-content:space-between;background:#fff8fa;border:1px solid #f6dbe3;border-radius:16px;padding:10px 12px;font-size:13px}.notice{border-radius:18px;background:#f0fff8;border:1px solid #bfeeda;color:#267657;padding:12px;font-weight:800;font-size:13px}.notice.warn{background:#fff4e8;border-color:#ffd1a9;color:#a9571e}.notice.danger{background:#fff0f2;border-color:#ffb5c0;color:#c72e4b}.btn,.btn2{border:0;border-radius:18px;padding:13px 14px;font-weight:1000;font-size:15px;cursor:pointer}.btn{background:linear-gradient(135deg,#ff758f,#ffb36b);color:white;box-shadow:0 12px 24px rgba(255,117,143,.28)}.btn2{background:#fff;border:1px solid #f2ccd5;color:#764f58}.wide{width:100%}.btn-row{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px}.control-card{background:linear-gradient(135deg,#ff7a91,#ffb26f);color:white}.control-card h2,.control-card .small{color:white}.timer{text-align:center;color:#fff;font-weight:1000;margin-top:4px}.form{display:grid;gap:10px}.field label{display:block;font-size:12px;font-weight:900;color:#7d5c64;margin:0 0 5px}input,select{width:100%;border:1px solid #efd1d9;background:#fff;border-radius:15px;padding:12px;font-size:15px;color:#2a2020;outline:none}.log-list{display:grid;gap:8px}.log-item{display:flex;gap:9px;align-items:flex-start;background:#fff8fa;border:1px solid #f6dbe3;border-radius:18px;padding:10px}.log-icon{width:36px;height:36px;border-radius:14px;display:grid;place-items:center;background:#fff0f5;border:1px solid #ffd0dd;font-size:19px}.log-text{font-size:13px;font-weight:900;line-height:1.35}.log-time{font-size:11px;color:#8d7378;margin-top:3px}.empty{padding:18px;text-align:center;color:#8d7378;font-weight:800;background:#fff8fa;border:1px dashed #f3ccd6;border-radius:18px}.footer-note{font-size:11px;line-height:1.55;color:#91777d;background:#fff8fa;border:1px solid #f4d8df;border-radius:18px;padding:12px;margin-bottom:12px}.bottom-nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:30;width:min(100%,900px);padding:9px 9px calc(9px + var(--safe-bottom));background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border-top:1px solid #f2d1da;box-shadow:0 -12px 30px rgba(184,96,117,.13);display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.nav-btn{border:0;background:transparent;border-radius:18px;padding:8px 3px;color:#85666e;font-weight:900;font-size:10.5px;display:grid;gap:3px;place-items:center}.nav-btn i{font-style:normal;font-size:21px}.nav-btn.active{background:#ffe8ef;color:#e24162}@media(min-width:720px){main{padding:18px}.desktop-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.desktop-grid>.card{margin-bottom:0}.wide-card{grid-column:1/-1}.mini-emotions{grid-template-columns:repeat(4,1fr)}}@media(max-width:430px){.owner-chip{display:none}.sentence{font-size:22px}.btn-row,.grid2{grid-template-columns:1fr}.vc-grid{grid-template-columns:1fr}.canvas-wrap{height:175px}.card{border-radius:22px;padding:13px}.bottom-nav{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
 <div class="app">
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo" aria-label="강아지 로고">🐶</div>
-      <div>
-        <h1>멍톡 AI</h1>
-        <p>강아지가 직접 말하는 밝은 통역 분석기</p>
-      </div>
-    </div>
-    <div class="owner-chip">💗 보호자: <span id="ownerChip">언니</span></div>
-  </header>
-
-  <main>
-    <section id="home" class="section active">
-      <div class="desktop-grid">
-        <div class="card hero-card">
-          <div class="profile-row">
-            <div class="avatar">🐶</div>
-            <div>
-              <p class="profile-name"><span id="dogLabel">봄이</span> <span style="color:#ff6382">♀</span></p>
-              <div class="profile-meta">말티즈 · 3살 · 여자아이</div>
-              <span class="mood-pill">오늘 기분 <span id="profileMood">😊 행복해요!</span></span>
-            </div>
-          </div>
-        </div>
-
-        <div class="card speech-card">
-          <div class="status-row"><h2>💬 실시간 통역</h2><span class="live" id="runStatus">대기 중</span></div>
-          <div class="bubble">
-            <div class="small" id="speakerLabel">🐶 봄이가 언니에게 하고싶은 말 💗</div>
-            <div class="sentence" id="sentence">“언니이이~\n나 좀 봐줘 🥺”</div>
-            <div class="confidence" id="confidence">신뢰도 표시 전</div>
-          </div>
-          <div class="quick-say" id="quickSay"></div>
-        </div>
-
-        <div class="card">
-          <h2>💗 현재 감정</h2>
-          <div class="emotion-big">
-            <div class="emoji-big" id="emotionEmoji">😊</div>
-            <div><div class="emotion-name" id="emotionName">행복해요!</div><div class="emotion-conf" id="emotionConf">분석 대기 중</div></div>
-          </div>
-          <div class="mini-emotions" id="emotionMini"></div>
-        </div>
-
-        <div class="card">
-          <h2>🐾 행동 분석</h2>
-          <div class="behavior-list" id="behaviorList"></div>
-          <div id="alertBox" class="notice" style="margin-top:10px">현재 위험 신호 없음. 편안하게 지켜봐도 좋아요.</div>
-        </div>
-
-        <div class="card desktop-wide">
-          <h2>🌸 오늘 봄이가 언니에게 한 말</h2>
-          <div id="historyPreview" class="log-list"><div class="empty">아직 기록이 없어요. 통역 시작하기를 눌러주세요 🐶</div></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="translate" class="section">
-      <div class="card speech-card">
-        <div class="status-row"><h2>💬 통역 결과</h2><span class="live" id="deviceStatus">대기 중</span></div>
-        <div class="bubble"><div class="small" id="speakerLabel2">🐶 봄이가 언니에게 하고싶은 말</div><div class="sentence" id="sentence2">“언니, 준비되면 내 목소리 들어줘!”</div><div class="confidence" id="confidence2">마이크 권한을 허용해 주세요</div></div>
-        <div class="inline-voice">
-          <div class="status-row"><h2>🎧 목소리 주파수</h2><span class="tag" id="audioStatus">대기</span></div>
-          <div class="canvas-wrap"><canvas id="spectrum"></canvas><span class="axis-label">낮은 소리</span><span class="axis-label right">높은 소리</span></div>
-          <div class="freq-info"><div class="info-box">주요 주파수<b id="peakFreq">- Hz</b></div><div class="info-box">음성 패턴<b id="voicePattern">대기 중</b></div></div><div class="voice-correction" id="voiceCorrection"><div class="vc-head"><span>🐶 음성 성격 보정 적용</span><b id="voiceBiasLabel">보통 친구 기준</b></div><div class="vc-grid" id="voiceBiasGrid"><div class="vc-pill"><span><em>관심/놀이</em><b>50%</b></span><div class="vc-bar"><i style="width:50%"></i></div></div><div class="vc-pill"><span><em>경계/화남</em><b>50%</b></span><div class="vc-bar"><i style="width:50%"></i></div></div></div><div class="vc-note" id="voiceBiasNote">설정한 성격 타입에 따라 같은 짖음도 다르게 해석해요.</div><div class="bias-flow"><div class="bias-card"><span>기본 음성 추정</span><b id="baseIntentLabel">대기</b></div><div class="bias-arrow">→</div><div class="bias-card"><span>성격 보정 후</span><b id="correctedIntentLabel">대기</b></div></div></div>
-        </div>
-      </div>
-      <div class="card control-card">
-        <h2>🎙️ 통역 컨트롤</h2>
-        <p class="small">통역 결과 바로 아래에서 목소리 그래프가 함께 움직여요. 현재는 음성 기반 통역을 중심으로 분석해요.</p>
-        <div class="btn-row" style="margin-top:12px"><button class="btn wide" id="startBtn">🐶 통역 시작</button><button class="btn2" id="pauseBtn">잠시 멈춤</button><button class="btn2" id="stopBtn">종료</button></div>
-        <div class="timer" id="timer">00:00</div>
-        <div class="form" style="margin-top:12px"><div class="field"><label>작은 소리 감지</label><input id="sensitivity" type="range" min="1" max="10" value="7"></div><div class="field"><label>소리 게이트(dB)</label><input id="gate" type="range" min="-75" max="-20" value="-48"></div></div>
-      </div>
-      <div class="card">
-        <h2>🎀 빠른 테스트</h2>
-        <button class="btn2 wide" id="sampleBtn">샘플 강아지 소리로 테스트하기</button><div class="test-buttons" style="margin-top:10px"><button class="btn2" id="testQuietBtn">🤫 조용한 친구 테스트</button><button class="btn2" id="testVocalBtn">🐶 수다쟁이 테스트</button><button class="btn2" id="testAngryBtn">😡 예민한 친구 테스트</button><button class="btn2" id="testPuppyBtn">🥰 애교쟁이 테스트</button></div>
-      </div>
-    </section>
-
-    <section id="history" class="section">
-      <div class="card"><h2>🧸 통역 히스토리</h2><div id="historyList" class="log-list"><div class="empty">기록이 아직 없어요.</div></div></div>
-      <div class="card"><button class="btn2 wide" id="clearHistoryBtn">기록 지우기</button></div>
-    </section>
-
-    <section id="settings" class="section">
-      <div class="card"><h2>⚙️ 프로필 설정</h2><div class="form"><div class="field"><label>보호자 호칭</label><input id="ownerName" value="언니" placeholder="예) 언니, 누나, 엄마, 아빠"></div><div class="field"><label>강아지 이름</label><input id="dogName" value="봄이" placeholder="예) 봄이"></div><div class="field"><label>견종</label><input id="breed" value="말티즈" placeholder="예) 말티즈"></div><div class="field"><label>성격 타입</label><select id="temperament"><option value="balanced">보통 친구</option><option value="quiet">조용하고 예민한 친구</option><option value="vocal">말이 많고 활발한 친구</option><option value="angry">화가 많고 경계심 있는 친구</option><option value="puppy">아기처럼 애교 많은 친구</option></select></div><div class="field"><label>성격 보정 강도 <b id="correctionValue">75%</b></label><input id="correctionStrength" type="range" min="0" max="100" value="75"></div><div class="field"><label>평소 하루 짖음 성향</label><select id="dailyBarkLevel"><option value="low">거의 안 짖음</option><option value="normal" selected>보통</option><option value="high">자주 짖음</option></select></div><p class="small" id="temperamentGuide">성격 타입에 따라 같은 짖음도 다르게 해석해요.</p><div class="personality-lab"><div class="personality-row"><div class="personality-box"><strong>현재 성격 프로필</strong><b id="profilePersonalityLabel">보통 친구</b></div><div class="personality-box"><strong>음성 보정 상태</strong><b id="profileCorrectionLabel">75%</b></div></div><div class="small" id="personalityRuleText">같은 짖음도 봄이의 평소 성격에 맞춰 다르게 해석해요.</div><div class="correction-meter"><i id="profileCorrectionBar" style="width:75%"></i></div></div><button class="btn wide" id="saveProfileBtn">프로필 저장하기</button></div></div>
-      <div class="card"><h2>상황 보정</h2><div class="form"><div class="field"><label>꼬리</label><select id="tail"><option>보통</option><option>흔듦</option><option>아래로</option><option>말림</option></select></div><div class="field"><label>입/호흡</label><select id="mouth"><option>보통</option><option>혀 내밀고 헥헥</option><option>입 닫음</option><option>입술 핥음</option></select></div><div class="field"><label>자세</label><select id="posture"><option>편안함</option><option>낮게 웅크림</option><option>경직</option><option>문 앞 대기</option></select></div><div class="field"><label>시선</label><select id="gaze"><option>보호자 응시</option><option>문/밖 응시</option><option>낯선 대상 응시</option><option>피함</option></select></div><div class="field"><label>상황</label><select id="context"><option>일상</option><option>식사 시간 근처</option><option>산책 시간 근처</option><option>낯선 사람/소리</option><option>더운 환경</option><option>혼자 있다가 만남</option><option>장난감/간식 소유</option></select></div></div></div>
-      <div class="footer-note">멍톡 AI는 강아지 음성 패턴과 보호자 입력값을 바탕으로 의도를 추정하는 앱입니다. 실제 진단 도구가 아니며, 통증·공격성·호흡 이상 신호가 반복되면 수의사 또는 행동 전문가 상담을 권장합니다.</div>
-    </section>
-  </main>
-
-  <nav class="bottom-nav" aria-label="하단 메뉴">
-    <button class="nav-btn active" data-tab="home"><i>🏠</i>홈</button>
-    <button class="nav-btn" data-tab="translate"><i>💬</i>통역</button>
-    <button class="nav-btn" data-tab="settings"><i>⚙️</i>설정</button>
-  </nav>
+<header class="topbar"><div class="brand"><div class="logo">🐶</div><div><h1>멍톡 AI</h1><p>강아지 음성 패턴을 재미있게 해석하는 보호자용 앱</p></div><div class="owner-chip">💗 보호자: <span id="ownerChip">언니</span></div></div></header>
+<main>
+<section id="home" class="section active"><div class="desktop-grid">
+<div class="card"><div class="profile-row"><div class="avatar">🐶</div><div><p class="profile-name"><span id="dogLabel">봄이</span> <span style="color:#ff6382">♀</span></p><div class="profile-meta"><span id="breedLabel">말티즈</span> · 음성 패턴 추정</div><span class="mood-pill">오늘 기분 <span id="profileMood">😊 대기 중</span></span></div></div></div>
+<div class="card"><div class="status-row"><h2>💬 최근 통역</h2><span class="live" id="runStatus">대기 중</span></div><div class="bubble"><div class="small" id="speakerLabel">🐶 봄이가 언니에게 하고싶은 말</div><div class="sentence" id="sentence">“언니이이~\n나 좀 봐줘 🥺”</div><div class="confidence" id="confidence">마이크 권한을 허용하면 분석을 시작해요</div></div><div class="quick-say" id="quickSay"></div></div>
+<div class="card"><h2>💗 현재 감정 추정</h2><div class="emotion-big"><div class="emoji-big" id="emotionEmoji">😊</div><div><div class="emotion-name" id="emotionName">대기 중</div><div class="emotion-conf" id="emotionConf">신뢰도 표시 전</div></div></div><div class="mini-emotions" id="emotionMini"></div></div>
+<div class="card"><h2>🐾 행동 입력 기반 보정</h2><div class="behavior-list" id="behaviorList"></div><div id="alertBox" class="notice" style="margin-top:10px">반복적인 통증·호흡 이상·공격성 신호는 전문가 상담을 권장해요.</div></div>
+<div class="card wide-card"><h2>🌸 오늘의 기록</h2><div id="historyPreview" class="log-list"><div class="empty">아직 기록이 없어요. 통역 시작하기를 눌러주세요 🐶</div></div></div>
+</div></section>
+<section id="translate" class="section"><div class="desktop-grid">
+<div class="card wide-card"><div class="status-row"><h2>🎧 실시간 음성 분석</h2><span class="tag" id="audioStatus">대기</span></div><div class="canvas-wrap"><canvas id="spectrum"></canvas><span class="axis-label">낮은 소리</span><span class="axis-label right">높은 소리</span></div><div class="freq-info"><div class="info-box">주요 주파수<b id="peakFreq">- Hz</b></div><div class="info-box">음성 패턴<b id="voicePattern">대기 중</b></div></div><div class="voice-correction"><div class="status-row"><b>🐶 성격 보정</b><span id="voiceBiasLabel" class="tag">보통 친구</span></div><div class="vc-grid" id="voiceBiasGrid"></div><div class="small" id="voiceBiasNote">성격 타입에 따라 같은 짖음도 다르게 해석해요.</div></div></div>
+<div class="card control-card"><h2>🎙️ 통역 컨트롤</h2><p class="small">마이크 음성의 크기·길이·주파수·거친 정도를 규칙 기반으로 추정해요. 실제 진단 도구는 아니에요.</p><div class="btn-row" style="margin-top:12px"><button class="btn wide" id="startBtn">🐶 통역 시작</button><button class="btn2" id="pauseBtn">잠시 멈춤</button><button class="btn2" id="stopBtn">종료</button></div><div class="timer" id="timer">00:00</div><div class="form" style="margin-top:12px"><div class="field"><label>작은 소리 감지</label><input id="sensitivity" type="range" min="1" max="10" value="7"></div><div class="field"><label>소리 게이트(dB)</label><input id="gate" type="range" min="-75" max="-20" value="-48"></div></div></div>
+<div class="card"><h2>🎀 빠른 테스트</h2><button class="btn2 wide" id="sampleBtn">샘플 강아지 소리로 테스트하기</button><div class="grid2"><button class="btn2" id="testQuietBtn">🤫 조용한 친구</button><button class="btn2" id="testVocalBtn">🐶 수다쟁이</button><button class="btn2" id="testAngryBtn">😡 예민한 친구</button><button class="btn2" id="testPuppyBtn">🥰 애교쟁이</button></div></div>
+</div></section>
+<section id="history" class="section"><div class="card"><h2>🧸 통역 히스토리</h2><div id="historyList" class="log-list"><div class="empty">기록이 아직 없어요.</div></div></div><div class="card"><button class="btn2 wide" id="clearHistoryBtn">기록 지우기</button></div></section>
+<section id="settings" class="section"><div class="desktop-grid"><div class="card"><h2>⚙️ 프로필 설정</h2><div class="form"><div class="field"><label>보호자 호칭</label><input id="ownerName" value="언니"></div><div class="field"><label>강아지 이름</label><input id="dogName" value="봄이"></div><div class="field"><label>견종</label><input id="breed" value="말티즈"></div><div class="field"><label>성격 타입</label><select id="temperament"><option value="balanced">보통 친구</option><option value="quiet">조용하고 예민한 친구</option><option value="vocal">말이 많고 활발한 친구</option><option value="angry">화가 많고 경계심 있는 친구</option><option value="puppy">아기처럼 애교 많은 친구</option></select></div><div class="field"><label>성격 보정 강도 <b id="correctionValue">75%</b></label><input id="correctionStrength" type="range" min="0" max="100" value="75"></div><div class="field"><label>평소 하루 짖음 성향</label><select id="dailyBarkLevel"><option value="low">거의 안 짖음</option><option value="normal" selected>보통</option><option value="high">자주 짖음</option></select></div><p class="small" id="temperamentGuide">성격 타입에 따라 같은 짖음도 다르게 해석해요.</p><button class="btn wide" id="saveProfileBtn">프로필 저장하기</button></div></div>
+<div class="card"><h2>상황 보정</h2><div class="form"><div class="field"><label>꼬리</label><select id="tail"><option>보통</option><option>흔듦</option><option>아래로</option><option>말림</option></select></div><div class="field"><label>입/호흡</label><select id="mouth"><option>보통</option><option>혀 내밀고 헥헥</option><option>입 닫음</option><option>입술 핥음</option></select></div><div class="field"><label>자세</label><select id="posture"><option>편안함</option><option>낮게 웅크림</option><option>경직</option><option>문 앞 대기</option></select></div><div class="field"><label>시선</label><select id="gaze"><option>보호자 응시</option><option>문/밖 응시</option><option>낯선 대상 응시</option><option>피함</option></select></div><div class="field"><label>상황</label><select id="context"><option>일상</option><option>식사 시간 근처</option><option>산책 시간 근처</option><option>낯선 사람/소리</option><option>더운 환경</option><option>혼자 있다가 만남</option><option>장난감/간식 소유</option></select></div></div></div><div class="footer-note wide-card">멍톡 AI는 Web Audio API 기반 음성 패턴 추정 프로그램입니다. 실제 강아지 감정·공격성·통증을 진단하지 않습니다. 반복적인 공격성, 통증 의심, 호흡 이상, 식욕 저하가 있으면 수의사 또는 행동 전문가 상담을 권장합니다.</div></div></section>
+</main>
+<nav class="bottom-nav"><button class="nav-btn active" data-tab="home"><i>🏠</i>홈</button><button class="nav-btn" data-tab="translate"><i>💬</i>통역</button><button class="nav-btn" data-tab="history"><i>🧸</i>기록</button><button class="nav-btn" data-tab="settings"><i>⚙️</i>설정</button></nav>
 </div>
-
 <script>
 'use strict';
-const $=id=>document.getElementById(id);
-const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
-const pick=a=>a[Math.floor(Math.random()*a.length)];
-let audioCtx=null,audioStream=null,videoStream=null,source=null,analyser=null,freqAnalyser=null,timeData=null,freqData=null,running=false,paused=false,eventStart=0,lastEvent=0,logs=[],timerStart=0,timerTick=null,camFacing='environment',idleAnim=null,lastResult=null,cameraAnim=null,camProbe=null,prevFrame=null,cameraState={motion:0,dog:0,tail:0,gaze:0,stress:0,guard:0,anger:0,brightness:0,contrast:0,face:0,tailPhase:0};
-const emotionList=['관심받고 싶음','행복','편안함','배고픔','산책 요구','놀고 싶음','졸림','불안','경계','불만','짜증','소유욕','질투','강한 경고','더움/스트레스','통증 의심'];
+const $=id=>document.getElementById(id), clamp=(n,min,max)=>Math.min(max,Math.max(min,n)), pick=a=>a[Math.floor(Math.random()*a.length)];
+let audioCtx=null,audioStream=null,source=null,analyser=null,freqAnalyser=null,timeData=null,freqData=null,running=false,paused=false,eventStart=0,lastEvent=0,logs=[],timerStart=0,timerTick=null,idleAnim=null,lastResult=null;
 const emojiMap={'관심받고 싶음':'🥺','행복':'😊','편안함':'😌','배고픔':'🍚','산책 요구':'🐾','놀고 싶음':'🎾','졸림':'😴','불안':'🥺','경계':'👀','불만':'😕','짜증':'😤','소유욕':'🧸','질투':'😾','강한 경고':'🚨','더움/스트레스':'💧','통증 의심':'🏥'};
-const cuteSentences={
- '관심받고 싶음':[`{o}이이~\n나 좀 봐줘 🥺`,`{o}, 핸드폰 말고 나 봐줘!`,`{o} 옆에 딱 붙어있고 싶어 💗`,`쓰담쓰담 충전 필요해 {o}!`,`{o}, 내 볼따구 만져줘… 아주 살짝!`],
- '행복':[`{o}! 나 지금 완전 행복 강아지야 😊`,`{o}랑 같이 있으니까 꼬리가 춤춰!`,`히히 {o}, 오늘 기분 햇살맛이야`,`{o} 최고야! 사랑해 💕`,`나 지금 말랑말랑 행복해 {o}!`],
- '편안함':[`{o}, 나 지금 포근해 😌`,`여기 좋아… {o} 냄새 나서 좋아`,`{o} 옆이면 마음이 폭신해`,`잠깐 이렇게 쉬어도 돼 {o}?`,`나 오늘 차분한 멍멍이야 {o}`],
- '배고픔':[`{o}... 배에서 꼬르륵 소리 나 🍚`,`{o}, 밥그릇이 나를 부르고 있어!`,`간식 한 개만… 딱 한 개만 {o}!`,`냠냠 시간 아니야 {o}?`,`킁킁, 맛있는 냄새 났어 {o}!`],
- '산책 요구':[`{o}! 산책 가자! 발바닥이 드릉드릉해 🐾`,`목줄 챙기는 거야 {o}? 나도 갈래!`,`밖에 냄새 맡고 싶어 {o}!`,`{o}, 문 앞에서 기다리는 중이야`,`오늘 바람 냄새 궁금해 {o}!`],
- '놀고 싶음':[`{o}! 공 던져줘! 내가 번개처럼 가져올게 🎾`,`나 지금 우다다 가능해 {o}!`,`장난감이 나랑 놀자고 해 {o}!`,`터그놀이 한 판만 하자 {o}!`,`심심해 {o}… 놀아주면 안 돼?`],
- '졸림':[`{o}... 나 졸려… 😴`,`{o} 옆에서 코 자고 싶어`,`담요 있는 곳으로 가도 돼 {o}?`,`나 눈꺼풀이 무거워 {o}…`,`{o}, 오늘은 조용히 쉬고 싶어`],
- '불안':[`{o}... 나 조금 무서워. 옆에 있어줘 🥺`,`낯선 소리가 나서 마음이 콩닥콩닥해 {o}`,`{o}, 천천히 말해줘. 나 안심하고 싶어`,`가지 마 {o}. 나 혼자는 쪼끔 불안해`,`내 이름 한번만 다정하게 불러줘 {o}`],
- '경계':[`{o}, 띵동 소리 났어! 내가 확인할게 👀`,`낯선 냄새가 나 {o}. 잠깐 조심하자`,`귀 쫑긋했어 {o}! 무슨 소리야?`,`{o}, 저쪽이 수상해 보여`,`내가 우리 집 지킴이 할게 {o}!`],
- '불만':[`{o}... 그건 쪼끔 싫은데 😕`,`나 지금 기분이 살짝 별로야 {o}.`,`{o}, 잠깐만 멈춰줄래?`,`나도 내 마음이 있다구 {o}!`,`그건 노노야 {o}...`],
- '짜증':[`{o}, 지금은 귀찮게 하지 마아 😤`,`나 혼자 있고 싶은 모드야 {o}.`,`으으... 그만하면 좋겠어 {o}!`,`{o}, 나 지금 살짝 뾰족해졌어!`,`내 마음이 삐죽했어 {o}.`],
- '소유욕':[`이거 내 보물이야 {o}! 🧸`,`{o}, 이 장난감은 내가 지킬래!`,`간식은 내 거라구 {o}!`,`내 자리야 {o}, 폭신해서 좋아!`,`건드리면 나 삐질지도 몰라 {o}!`],
- '질투':[`{o}, 나 말고 누구 보는 거야? 😾`,`{o}는 내 편이지? 나도 쓰담해줘!`,`다른 강아지 냄새 나... 나 삐졌어 {o}!`,`{o}, 나 여기 있어! 나 먼저 봐줘!`,`나도 사랑 충전 받고 싶어 {o}!`],
- '강한 경고':[`{o}, 지금은 가까이 오지 마! 🚨`,`나 진짜 싫다는 신호 보내는 중이야 {o}.`,`잠깐 거리 두자 {o}. 나 진정할 시간이 필요해.`,`으르렁 신호야 {o}. 만지지 말고 기다려줘!`,`나 지금 많이 예민해 {o}. 안전하게 지켜봐줘.`],
- '더움/스트레스':[`헥헥… {o}, 물 마시고 싶어 💧`,`나 더워서 혀가 바빠졌어 {o}!`,`시원한 바닥 찾아도 돼 {o}?`,`잠깐 쉬자 {o}. 그늘이 좋아`,`{o}, 에어컨 바람 쪽으로 가고 싶어`],
- '통증 의심':[`{o}... 나 몸이 좀 이상해. 살살 봐줘 🏥`,`아야 느낌이 있어 {o}. 천천히 만져줘`,`평소랑 다른 것 같아 {o}. 병원 선생님한테 물어볼까?`,`나 오늘 움직이기 싫어 {o}. 상태 확인해줘`,`{o}, 아픈 신호일 수도 있어. 지켜봐줘`]
-};
-const angryTemperamentSentences={
- '경계':[`{o}, 저거 가까이 오지 못하게 해.`,`{o}, 나 지금 지키는 중이야. 저쪽 수상해.`,`가까이 오면 내가 먼저 막을 거야 {o}.`,`{o}, 낯선 거 싫어. 여기서 물러나라고 해!`,`나 지금 눈 떼지 않고 보고 있어 {o}.`],
- '불만':[`{o}, 그거 하지 마. 진짜 싫어.`,`나 지금 기분 안 좋아 {o}. 멈춰줘.`,`{o}, 더 하면 나 화낼 거야.`,`싫다고 말하고 있어 {o}. 알아들어줘.`,`나 참고 있는 중이야 {o}. 그만해.`],
- '짜증':[`{o}, 건드리지 마. 나 지금 예민해.`,`으르릉... {o}, 나 혼자 둘래?`,`{o}, 지금 귀찮게 하면 나 진짜 화나.`,`나 지금 뾰족한 모드야 {o}. 물러나줘.`,`싫어 {o}. 가까이 오지 마.`],
- '소유욕':[`이거 내 거야 {o}. 건드리지 마!`,`{o}, 내 보물에 손대지 마.`,`이건 내가 지킬 거야 {o}.`,`내 간식이야. 가까이 오면 싫어 {o}!`,`{o}, 이건 절대 양보 못 해.`],
- '질투':[`{o}, 나 말고 누구 보는 거야? 마음에 안 들어.`,`{o}, 다른 애 만지지 마. 나 먼저 봐.`,`언니는 내 편이지? 다른 냄새 싫어.`,`{o}, 나 지금 질투 나. 나도 만져줘.`,`다른 애한테 가지 마 {o}.`],
- '강한 경고':[`{o}, 멈춰. 더 가까이 오지 마. 🚨`,`으르릉... 나 진짜 싫어. 물러나 {o}.`,`{o}, 지금 만지면 안 돼. 나 진심으로 경고 중이야.`,`나 건드리지 마 {o}. 진정할 시간 줘.`,`{o}, 위험 신호야. 거리 두고 기다려줘.`],
- '불안':[`{o}, 무서운데 화도 나. 옆에 있어줘.`,`나 지금 불안해서 예민해 {o}. 천천히 해줘.`,`{o}, 낯선 거 싫어. 가까이 오지 않게 해줘.`],
- '관심받고 싶음':[`{o}, 나 봐. 지금 바로.`,`{o}, 나 여기 있잖아. 나 먼저 봐줘.`,`핸드폰 말고 나 봐 {o}. 나 기다렸어.`]
-};
-const patternExtra={
- '짧고 또렷한 멍':[`멍! {o}, 지금 바로 말하고 싶은 게 있어!`,`짧게 콕 말할게 {o}!`],
- '높고 애교 섞인 소리':[`삐용삐용 애교 신호야 {o}!`,`목소리가 얇게 나왔어 {o}. 나 좀 봐줘!`],
- '낮고 조심스러운 소리':[`낮게 말하는 중이야 {o}. 천천히 다가와줘.`,`으음… {o}, 지금은 신중하게 보고 있어.`],
- '헥헥 숨찬 소리':[`헥헥 숨이 차 {o}. 잠깐 쉬고 싶어.`,`물 한 모금 마시면 좋겠어 {o}!`],
- '길게 부르는 소리':[`아우우… {o}, 나 부르는 중이야!`,`길게 말했어 {o}. 내 마음 좀 들어줘.`]
-};
-function profile(){return {owner:($('ownerName')?.value||'언니').trim()||'언니',dog:($('dogName')?.value||'봄이').trim()||'봄이',breed:($('breed')?.value||'말티즈').trim()||'말티즈',temperament:($('temperament')?.value||'balanced'),correction:+($('correctionStrength')?.value||75),dailyBark:($('dailyBarkLevel')?.value||'normal')}}
-function saveProfile(){localStorage.setItem('meongtalkProfileMobile',JSON.stringify(profile()));applyProfile();toast('프로필 저장 완료!')}
-function loadProfile(){try{const p=JSON.parse(localStorage.getItem('meongtalkProfileMobile')||'{}');if(p.owner)$('ownerName').value=p.owner;if(p.dog)$('dogName').value=p.dog;if(p.breed)$('breed').value=p.breed;if(p.temperament&&$('temperament'))$('temperament').value=p.temperament;if(p.correction!=null&&$('correctionStrength'))$('correctionStrength').value=p.correction;if(p.dailyBark&&$('dailyBarkLevel'))$('dailyBarkLevel').value=p.dailyBark}catch(e){}applyProfile()}
-function temperamentLabel(t){return ({balanced:'보통 친구',quiet:'조용하고 예민한 친구',vocal:'말이 많고 활발한 친구',angry:'화가 많고 경계심 있는 친구',puppy:'아기처럼 애교 많은 친구'})[t]||'보통 친구'}
-function temperamentHelp(t){return ({balanced:'평균 기준으로 짖음·움직임을 해석해요.',quiet:'작은 소리와 짧은 신호도 더 의미 있게 반영해요. 조용한 아이가 갑자기 짖으면 불안/경계 가중치가 올라가요.',vocal:'원래 잘 짖는 아이로 보고, 단순 짖음은 관심/놀이로 먼저 해석해요. 화남 판정 기준은 조금 더 높여요.',angry:'화가 많고 경계심 있는 아이로 보고, 낮은 으르렁·큰 소리·반복 짖음은 불만/경고 쪽으로 더 강하게 반영해요.',puppy:'애교·흥분 표현이 많은 아이로 보고, 높은 소리와 짧은 멍은 관심/놀이 쪽으로 더 부드럽게 해석해요.'})[t]||'성격 타입에 따라 같은 짖음도 다르게 해석해요.'}
-function temperamentRuleText(t){return ({balanced:'평균 기준으로 해석해요. 보정은 약하게 들어가요.',quiet:'평소 조용한 아이는 한 번 짖는 것 자체가 중요한 신호라서 불안/경계 민감도를 올려요.',vocal:'평소 말이 많은 아이는 반복 짖음을 바로 화남으로 보지 않고 관심/놀이 가능성을 먼저 봐요.',angry:'화가 많은 친구는 저음·큰 소리·짧은 반복음에 불만/짜증/강한 경고 가중치를 더 강하게 줘요. 번역 말투도 더 단호하게 바뀌어요.',puppy:'애교 많은 아이는 높은 소리와 짧은 멍을 관심/놀이/애착 표현으로 더 부드럽게 봐요.'})[t]||'같은 짖음도 성격에 맞춰 다르게 해석해요.'}
-function updatePersonalityPanel(){const p=profile();if($('correctionValue'))$('correctionValue').textContent=p.correction+'%';if($('profileCorrectionLabel'))$('profileCorrectionLabel').textContent=p.correction+'%';if($('profileCorrectionBar'))$('profileCorrectionBar').style.width=p.correction+'%';if($('profilePersonalityLabel'))$('profilePersonalityLabel').textContent=temperamentLabel(p.temperament);if($('personalityRuleText'))$('personalityRuleText').textContent=temperamentRuleText(p.temperament)+(p.dailyBark==='low'?' 평소 거의 안 짖는 편이라 짧은 멍도 더 크게 반영해요.':p.dailyBark==='high'?' 평소 자주 짖는 편이라 단순 반복 짖음은 화남 가중치를 낮춰요.':'')}
-function applyProfile(){const p=profile();$('ownerChip').textContent=p.owner;$('dogLabel').textContent=p.dog;$('speakerLabel').textContent=`🐶 ${p.dog}가 ${p.owner}에게 하고싶은 말 💗`;$('speakerLabel2').textContent=`🐶 ${p.dog}가 ${p.owner}에게 하고싶은 말`;if($('dogDetectLabel'))$('dogDetectLabel').textContent=`🐶 ${p.dog} 감지 중`;if($('temperamentGuide'))$('temperamentGuide').textContent='🐾 '+temperamentLabel(p.temperament)+' · '+temperamentHelp(p.temperament);renderCameraAnalysis(lastResult?.intent||'행복');renderVoiceBias();updatePersonalityPanel();}
-function nav(tab){document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===tab));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));if(tab==='translate'||tab==='home')setTimeout(drawIdleSpectrum,50)}
-function toast(msg){console.log(msg)}
-function drawIdleSpectrum(){const c=$('spectrum');if(!c)return;const ctx=c.getContext('2d'),w=c.width=c.clientWidth*devicePixelRatio,h=c.height=c.clientHeight*devicePixelRatio;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,w,h);drawSpectrumBackground(ctx,w,h);for(let i=0;i<44;i++){const x=i/44*w+4*devicePixelRatio,bw=w/44-7*devicePixelRatio;const amp=.18+.22*Math.abs(Math.sin(i*.8+Date.now()/550));const bh=amp*h;bar(ctx,x,h-bh-8*devicePixelRatio,bw,bh+8*devicePixelRatio,9*devicePixelRatio)}ctx.strokeStyle='rgba(116,211,194,.85)';ctx.lineWidth=2*devicePixelRatio;ctx.beginPath();for(let i=0;i<150;i++){const x=i/149*w,y=h*.54+Math.sin(i*.23+Date.now()/500)*h*.055;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.stroke();}
+const sentenceMap={
+'관심받고 싶음':['{o}이이~\n나 좀 봐줘 🥺','{o}, 핸드폰 말고 나 봐줘!','쓰담쓰담 충전 필요해 {o}!'],
+'행복':['{o}! 나 지금 완전 행복 강아지야 😊','{o}랑 같이 있으니까 꼬리가 춤춰!','나 지금 말랑말랑 행복해 {o}!'],
+'편안함':['{o}, 나 지금 포근해 😌','{o} 옆이면 마음이 폭신해','나 오늘 차분한 멍멍이야 {o}'],
+'배고픔':['{o}... 배에서 꼬르륵 소리 나 🍚','간식 한 개만… 딱 한 개만 {o}!','냠냠 시간 아니야 {o}?'],
+'산책 요구':['{o}! 산책 가자! 발바닥이 드릉드릉해 🐾','밖에 냄새 맡고 싶어 {o}!','{o}, 문 앞에서 기다리는 중이야'],
+'놀고 싶음':['{o}! 공 던져줘! 내가 번개처럼 가져올게 🎾','나 지금 우다다 가능해 {o}!','심심해 {o}… 놀아주면 안 돼?'],
+'불안':['{o}... 나 조금 무서워. 옆에 있어줘 🥺','낯선 소리가 나서 마음이 콩닥콩닥해 {o}','내 이름 한번만 다정하게 불러줘 {o}'],
+'경계':['{o}, 띵동 소리 났어! 내가 확인할게 👀','낯선 냄새가 나 {o}. 잠깐 조심하자','{o}, 저쪽이 수상해 보여'],
+'불만':['{o}... 그건 쪼끔 싫은데 😕','{o}, 잠깐만 멈춰줄래?','그건 노노야 {o}...'],
+'짜증':['{o}, 지금은 귀찮게 하지 마아 😤','나 혼자 있고 싶은 모드야 {o}.','내 마음이 삐죽했어 {o}.'],
+'소유욕':['이거 내 보물이야 {o}! 🧸','{o}, 이 장난감은 내가 지킬래!','간식은 내 거라구 {o}!'],
+'강한 경고':['{o}, 지금은 가까이 오지 마! 🚨','잠깐 거리 두자 {o}. 나 진정할 시간이 필요해.','나 지금 많이 예민해 {o}. 안전하게 지켜봐줘.'],
+'더움/스트레스':['헥헥… {o}, 물 마시고 싶어 💧','나 더워서 혀가 바빠졌어 {o}!','잠깐 쉬자 {o}. 그늘이 좋아'],
+'통증 의심':['{o}... 나 몸이 좀 이상해. 살살 봐줘 🏥','평소랑 다른 것 같아 {o}. 병원 선생님한테 물어볼까?']};
+function profile(){return {owner:($('ownerName').value||'언니').trim()||'언니',dog:($('dogName').value||'봄이').trim()||'봄이',breed:($('breed').value||'말티즈').trim()||'말티즈',temperament:$('temperament').value,correction:+$('correctionStrength').value,dailyBark:$('dailyBarkLevel').value}}
+function tLabel(t){return {balanced:'보통 친구',quiet:'조용하고 예민한 친구',vocal:'말이 많고 활발한 친구',angry:'화가 많고 경계심 있는 친구',puppy:'아기처럼 애교 많은 친구'}[t]||'보통 친구'}
+function tHelp(t){return {balanced:'평균 기준으로 짖음·움직임을 해석해요.',quiet:'평소 조용한 아이이므로 작은 짖음도 불안/경계 신호로 더 민감하게 봐요.',vocal:'원래 잘 짖는 아이로 보고 단순 반복음은 관심/놀이 쪽으로 먼저 해석해요.',angry:'낮은 소리·큰 소리·짧은 반복음은 불만/경고 쪽 가중치를 높여요.',puppy:'높은 소리와 짧은 멍은 관심/놀이/애착 표현으로 더 부드럽게 봐요.'}[t]}
+function saveProfile(){localStorage.setItem('meongtalkProfileClean',JSON.stringify(profile()));applyProfile();alert('프로필 저장 완료!')}
+function loadProfile(){try{const p=JSON.parse(localStorage.getItem('meongtalkProfileClean')||'{}');['ownerName','dogName','breed','temperament','correctionStrength','dailyBarkLevel'].forEach(id=>{const k={ownerName:'owner',dogName:'dog',breed:'breed',temperament:'temperament',correctionStrength:'correction',dailyBarkLevel:'dailyBark'}[id];if(p[k]!=null)$(id).value=p[k]})}catch(e){}applyProfile()}
+function applyProfile(){const p=profile();$('ownerChip').textContent=p.owner;$('dogLabel').textContent=p.dog;$('breedLabel').textContent=p.breed;$('speakerLabel').textContent=`🐶 ${p.dog}가 ${p.owner}에게 하고싶은 말`;$('correctionValue').textContent=p.correction+'%';$('temperamentGuide').textContent='🐾 '+tLabel(p.temperament)+' · '+tHelp(p.temperament);renderBias();}
+function nav(tab){document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===tab));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));setTimeout(drawIdleSpectrum,30)}
+function drawBg(ctx,w,h){const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#fff8fc');g.addColorStop(1,'#fff0d2');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);ctx.strokeStyle='rgba(255,130,163,.16)';for(let y=h/4;y<h;y+=h/4){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}}
+function roundBar(ctx,x,y,w,h){const g=ctx.createLinearGradient(0,y,0,y+h);g.addColorStop(0,'#ff7b9a');g.addColorStop(1,'#ffd27c');ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(x,y,w,h,8);ctx.fill()}
+function drawIdleSpectrum(){const c=$('spectrum'); if(!c)return;const dpr=devicePixelRatio||1,ctx=c.getContext('2d'),w=c.width=c.clientWidth*dpr,h=c.height=c.clientHeight*dpr;ctx.clearRect(0,0,w,h);drawBg(ctx,w,h);for(let i=0;i<44;i++){const bh=(.18+.22*Math.abs(Math.sin(i*.8+Date.now()/550)))*h;roundBar(ctx,i/44*w+4*dpr,h-bh-8*dpr,w/44-7*dpr,bh+8*dpr)}ctx.strokeStyle='rgba(116,211,194,.85)';ctx.lineWidth=2*dpr;ctx.beginPath();for(let i=0;i<150;i++){const x=i/149*w,y=h*.54+Math.sin(i*.23+Date.now()/500)*h*.055;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke()}
 function animateIdle(){cancelAnimationFrame(idleAnim);const go=()=>{if(!running)drawIdleSpectrum();idleAnim=requestAnimationFrame(go)};go()}
-function drawSpectrumBackground(ctx,w,h){const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#fff8fc');g.addColorStop(1,'#fff0d2');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);ctx.strokeStyle='rgba(255,130,163,.16)';ctx.lineWidth=devicePixelRatio;for(let y=h/4;y<h;y+=h/4){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}}
-function round(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
-function bar(ctx,x,y,w,h,r){const g=ctx.createLinearGradient(0,y,0,y+h);g.addColorStop(0,'#ff7b9a');g.addColorStop(1,'#ffd27c');ctx.fillStyle=g;round(ctx,x,y,w,h,r);ctx.fill()}
-function drawLiveSpectrum(time,ff){const c=$('spectrum'),ctx=c.getContext('2d'),w=c.width=c.clientWidth*devicePixelRatio,h=c.height=c.clientHeight*devicePixelRatio;ctx.clearRect(0,0,w,h);drawSpectrumBackground(ctx,w,h);if(ff){const bars=48,step=Math.max(1,Math.floor(ff.length/bars));for(let i=0;i<bars;i++){let v=(ff[i*step]+115)/115;v=clamp(v,0.04,1);const x=i/bars*w+4*devicePixelRatio,bw=w/bars-7*devicePixelRatio,bh=v*h*.78;bar(ctx,x,h-bh-8*devicePixelRatio,bw,bh+8*devicePixelRatio,9*devicePixelRatio)}}ctx.strokeStyle='rgba(116,211,194,.95)';ctx.lineWidth=2*devicePixelRatio;ctx.beginPath();for(let i=0;i<time.length;i+=4){const x=i/(time.length-1)*w,y=(.5+time[i]*.32)*h;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.stroke()}
+function drawLive(time,ff){const c=$('spectrum'),dpr=devicePixelRatio||1,ctx=c.getContext('2d'),w=c.width=c.clientWidth*dpr,h=c.height=c.clientHeight*dpr;ctx.clearRect(0,0,w,h);drawBg(ctx,w,h);const bars=48,step=Math.max(1,Math.floor(ff.length/bars));for(let i=0;i<bars;i++){let v=clamp((ff[i*step]+115)/115,.04,1),bh=v*h*.78;roundBar(ctx,i/bars*w+4*dpr,h-bh-8*dpr,w/bars-7*dpr,bh+8*dpr)}ctx.strokeStyle='rgba(116,211,194,.95)';ctx.lineWidth=2*dpr;ctx.beginPath();for(let i=0;i<time.length;i+=4){const x=i/(time.length-1)*w,y=(.5+time[i]*.32)*h;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke()}
 function zcr(buf){let z=0;for(let i=1;i<buf.length;i++)if((buf[i-1]<0&&buf[i]>=0)||(buf[i-1]>=0&&buf[i]<0))z++;return z/buf.length}
 function pitch(buf,rate){let rms=Math.sqrt(buf.reduce((s,v)=>s+v*v,0)/buf.length);if(rms<.015)return 0;let best=0,bestCorr=0;const min=Math.floor(rate/900),max=Math.floor(rate/70);for(let lag=min;lag<=max;lag++){let corr=0;for(let i=0;i<buf.length-lag;i++)corr+=buf[i]*buf[i+lag];corr/=buf.length-lag;if(corr>bestCorr){bestCorr=corr;best=lag}}return bestCorr>.004?Math.round(rate/best):0}
-function spectral(ff,rate){let sum=0,wsum=0,total=0,roll=0;for(let i=0;i<ff.length;i++){const mag=Math.pow(10,ff[i]/20),freq=i*rate/(2*ff.length);sum+=mag;wsum+=mag*freq;total+=mag}let acc=0;for(let i=0;i<ff.length;i++){acc+=Math.pow(10,ff[i]/20);if(acc>=total*.85){roll=i*rate/(2*ff.length);break}}return {centroid:sum?wsum/sum:0,rolloff:roll}}
-function mixScore(base, adjusted, strength){return clamp(Math.round(base+(adjusted-base)*(strength/100)),0,99)}
-function voiceBiasScores(v,baseIntent,pattern){const temp=profile().temperament;let social=45,play=35,anxiety=25,guard=25,anger=12,stress=15;const low=v.pitch>0&&v.pitch<180,high=v.pitch>500,loud=v.db>-42,long=v.duration>1.1,short=v.duration<.75,rough=v.zcr>.1;
-  if(high){social+=22;play+=12} if(short&&loud){play+=20;social+=8} if(low){guard+=22;anger+=12} if(long){anxiety+=22} if(rough){stress+=18;anxiety+=8}
-  if(['경계','불만','짜증','소유욕','강한 경고'].includes(baseIntent)){guard+=22;anger+=12} if(['놀고 싶음','행복','관심받고 싶음'].includes(baseIntent)){social+=18;play+=16}
-  if(temp==='quiet'){anxiety+=18;guard+=18;social-=8;play-=6;if(short&&loud){guard+=12;anxiety+=10}}
-  if(temp==='vocal'){social+=22;play+=20;guard-=18;anger-=16;if(low&&long)guard+=8}
-  if(temp==='angry'){guard+=30;anger+=30;anxiety+=10;social-=12;play-=8;if(low||loud)anger+=16;if(rough||short)anger+=8;if(long&&low)guard+=12}
-  if(temp==='puppy'){social+=26;play+=18;anxiety+=8;guard-=12;anger-=18;if(high) social+=10}
-  const p=profile();if(p.dailyBark==='low'){anxiety+=8;guard+=8;social-=4;play-=4}if(p.dailyBark==='high'){social+=8;play+=8;guard-=8;anger-=8}
-  const base={social:50,play:45,anxiety:25,guard:25,anger:15,stress:20};
-  return {social:mixScore(base.social,social,p.correction),play:mixScore(base.play,play,p.correction),anxiety:mixScore(base.anxiety,anxiety,p.correction),guard:mixScore(base.guard,guard,p.correction),anger:mixScore(base.anger,anger,p.correction),stress:mixScore(base.stress,stress,p.correction)};}
-function applyVoiceTemperament(baseIntent,pattern,v){const temp=profile().temperament;const scores=voiceBiasScores(v,baseIntent,pattern);let intent=baseIntent,reason='기본 음성 패턴을 우선 적용했어요.';const strength=profile().correction;
-  if(temp==='quiet'){
-    reason='조용한 친구라서 작은 짖음도 불안/경계 신호로 더 민감하게 봐요.';
-    if(scores.guard>=55 && !['산책 요구','배고픔','더움/스트레스'].includes(intent)) intent='경계';
-    if(scores.anxiety>=52 && ['관심받고 싶음','놀고 싶음'].includes(intent)) intent='불안';
-  } else if(temp==='vocal'){
-    reason='말이 많은 친구라서 반복 짖음은 먼저 관심/놀이 표현으로 부드럽게 해석해요.';
-    if(['경계','불만','짜증'].includes(intent) && scores.anger<62) intent=scores.play>scores.social?'놀고 싶음':'관심받고 싶음';
-    if(intent==='강한 경고' && scores.anger<72) intent='불만';
-  } else if(temp==='angry'){
-    reason='경계심이 높은 친구라서 낮고 강한 소리에는 불만/경고 가중치를 더 줘요.';
-    if(scores.anger>=62) intent='강한 경고';
-    else if(scores.guard>=56 && ['관심받고 싶음','놀고 싶음','행복'].includes(intent)) intent='경계';
-    else if(scores.anger>=48 && !['산책 요구','배고픔','더움/스트레스'].includes(intent)) intent=scores.anger>=56?'짜증':'불만';
-  } else if(temp==='puppy'){
-    reason='애교가 많은 친구라서 높은 소리와 짧은 멍은 관심/놀이 쪽으로 해석해요.';
-    if(['불만','짜증','경계'].includes(intent) && scores.anger<60) intent=scores.play>=scores.social?'놀고 싶음':'관심받고 싶음';
-  }
-  return {intent,scores,reason:reason+` 보정 강도 ${strength}%`,baseIntent,correctedIntent:intent};}
-function renderVoiceBias(data){if(!$('voiceBiasGrid'))return;const temp=profile().temperament;const d=data||{scores:{social:50,play:45,anxiety:25,guard:25,anger:15,stress:20},reason:'설정한 성격 타입에 따라 같은 짖음도 다르게 해석해요.',baseIntent:'대기'};$('voiceBiasLabel').textContent=temperamentLabel(temp);$('voiceBiasNote').textContent=d.reason+(d.baseIntent&&d.baseIntent!=='대기'?` · 기본 추정: ${d.baseIntent}`:'');if($('baseIntentLabel'))$('baseIntentLabel').textContent=d.baseIntent||'대기';if($('correctedIntentLabel'))$('correctedIntentLabel').textContent=d.correctedIntent||d.intent||'대기';const arr=[['관심/애착',d.scores.social],['놀이/흥분',d.scores.play],['불안',d.scores.anxiety],['경계',d.scores.guard],['화남/불만',d.scores.anger],['스트레스',d.scores.stress]];$('voiceBiasGrid').innerHTML=arr.map(x=>`<div class="vc-pill"><span><em>${x[0]}</em><b>${x[1]}%</b></span><div class="vc-bar"><i style="width:${x[1]}%"></i></div></div>`).join('')}
-function classify(v){let pattern='보통 멍',intent='관심받고 싶음';const temp=profile().temperament;if(v.pitch>520 || (v.centroid>1900&&v.db<-34)){pattern='높고 애교 섞인 소리';intent='관심받고 싶음'}if(v.pitch>0&&v.pitch<170&&v.duration>.7){pattern='낮고 조심스러운 소리';intent='경계'}if(v.duration>1.5&&v.zcr<.07){pattern='길게 부르는 소리';intent='불안'}if(v.zcr>.11&&v.duration>1.0){pattern='헥헥 숨찬 소리';intent='더움/스트레스'}if(v.duration<.75&&v.db>-42){pattern='짧고 또렷한 멍';intent='놀고 싶음'}const ctx=$('context')?.value||'일상',tail=$('tail')?.value||'',mouth=$('mouth')?.value||'',posture=$('posture')?.value||'',gaze=$('gaze')?.value||'';if(ctx==='식사 시간 근처')intent='배고픔';if(ctx==='산책 시간 근처'||posture==='문 앞 대기'||gaze==='문/밖 응시')intent='산책 요구';if(ctx==='더운 환경'||mouth==='혀 내밀고 헥헥')intent='더움/스트레스';if(ctx==='낯선 사람/소리'||gaze==='낯선 대상 응시')intent=pattern==='낮고 조심스러운 소리'?'경계':'불안';if(tail==='흔듦'&&['놀고 싶음','관심받고 싶음'].includes(intent))intent=Math.random()>.5?'행복':'놀고 싶음';if(posture==='낮게 웅크림'||tail==='말림')intent='불안';
-  // 음성 분석 전용 성격 보정: 기본 음성/상황 추정값을 성격 타입에 맞게 재해석
-  const baseIntentBeforeTemperament=intent;
-  const voiceBias=applyVoiceTemperament(baseIntentBeforeTemperament,pattern,v);
-  intent=voiceBias.intent;
-  // 화남/경고 세분화: 음성 저음, 짧은 반복, 경직 자세, 낯선 대상 주시, 소유 상황을 조합해 추정
-  if(posture==='경직' && gaze==='낯선 대상 응시') intent = pattern==='낮고 조심스러운 소리' ? '강한 경고' : '경계';
-  if(tail==='아래로' && posture==='경직') intent='불만';
-  if(tail==='말림' && gaze==='낯선 대상 응시') intent='짜증';
-  if(ctx==='혼자 있다가 만남' && gaze==='보호자 응시') intent=Math.random()>.55?'질투':'관심받고 싶음';if(ctx==='장난감/간식 소유') intent=posture==='경직'?'소유욕':'불만';
-  if((v.pitch>0&&v.pitch<150&&v.db>-38&&v.duration>.45) || (posture==='경직'&&tail==='말림')) intent='강한 경고';
-  if(gaze==='피함' && posture==='경직') intent='불만';
-  if(temp==='vocal'&&intent==='강한 경고'&&!(posture==='경직'||gaze==='낯선 대상 응시')) intent='짜증';
-  if(temp==='angry'&&['불만','짜증'].includes(intent)&&posture==='경직') intent='강한 경고';
-  voiceBias.intent=intent;voiceBias.correctedIntent=intent;
-  return {pattern,intent,voiceBias}}
-function sentence(intent,pattern){const p=profile(),o=p.owner;let pool=[...(cuteSentences[intent]||cuteSentences['관심받고 싶음'])];
-  // 화가 많고 경계심 있는 친구는 같은 감정이라도 더 단호하고 공격성 있어 보이는 말투로 번역
-  if(p.temperament==='angry' && angryTemperamentSentences[intent]){
-    pool=[...angryTemperamentSentences[intent]];
-    if(['경계','불만','짜증','소유욕','질투','강한 경고'].includes(intent) && cuteSentences[intent]) pool=pool.concat(cuteSentences[intent].slice(0,2));
-  }
-  if(Math.random()<.42&&patternExtra[pattern])pool=pool.concat(patternExtra[pattern]);return '“'+pick(pool).replaceAll('{o}',o)+'”'}
-function updateUI(intent,pattern,v,voiceBias){const p=profile(),em=emojiMap[intent]||'🐶',conf=clamp(Math.round(68+Math.random()*24+(v?.db>-35?5:0)),55,98);const s=sentence(intent,pattern);$('sentence').textContent=s;$('sentence2').textContent=s;$('confidence').textContent=`신뢰도 ${conf}% · ${pattern} · ${temperamentLabel(p.temperament)}`;$('confidence2').textContent=`신뢰도 ${conf}% · ${pattern} · ${temperamentLabel(p.temperament)}`;$('emotionEmoji').textContent=em;$('emotionName').textContent=intent==='행복'?'행복해요!':intent;$('emotionConf').textContent=`${conf}% · ${pattern}`;$('profileMood').textContent=`${em} ${intent}`;$('runStatus').textContent=running?'통역 중':'분석됨';$('voicePattern').textContent=pattern;$('peakFreq').textContent=(v?.pitch||v?.centroid?Math.round(v.pitch||v.centroid):'-')+' Hz';renderEmotions(intent,conf);renderBehavior(intent);renderCameraAnalysis(intent);renderVoiceBias(voiceBias);addLog({time:new Date(),intent,pattern,conf,sentence:s,emoji:em});lastResult={intent,pattern,conf,sentence:s};}
-function renderEmotions(top,conf){const vals=emotionList.slice(0,8).map(e=>({e,val:e===top?conf:Math.round(5+Math.random()*45)}));$('emotionMini').innerHTML=vals.map(x=>`<div class="emo ${x.e===top?'hot':''}"><b>${emojiMap[x.e]||'🐾'}</b>${x.e}<br>${x.val}%</div>`).join('')}
-function renderBehavior(intent){const base=[];const tail=$('tail')?.value||'보통',mouth=$('mouth')?.value||'보통',posture=$('posture')?.value||'편안함',gaze=$('gaze')?.value||'보호자 응시';if(tail==='흔듦')base.push(['💗 꼬리를 흔들고 있어요','애정']);if(mouth==='혀 내밀고 헥헥')base.push(['💧 헥헥거리는 중이에요','더움']);if(posture==='문 앞 대기')base.push(['🚪 문 앞에서 기다려요','산책']);if(posture==='경직')base.push(['👀 몸이 조금 경직됐어요','주의']);if(gaze==='보호자 응시')base.push(['🥰 언니를 바라보고 있어요','관심']);if(gaze==='낯선 대상 응시')base.push(['👀 낯선 대상을 보고 있어요','경계']);if(!base.length)base.push(['🐾 편안하게 관찰 중이에요','안정']);$('behaviorList').innerHTML=base.slice(0,4).map(x=>`<div class="item"><span>${x[0]}</span><span class="tag soft">${x[1]}</span></div>`).join('');const alert=$('alertBox');alert.className='notice';alert.textContent='현재 위험 신호 없음. 편안하게 지켜봐도 좋아요.';if(['불안','경계','더움/스트레스','불만','짜증','소유욕','질투'].includes(intent)){alert.className='notice warn';alert.textContent=`${intent} 신호가 보여요. 같은 패턴이 반복되는지 살펴봐 주세요.`}if(intent==='강한 경고'){alert.className='notice danger';alert.textContent='강한 경고 신호예요. 만지지 말고 거리를 두며 진정 시간을 주세요.'}if(intent==='통증 의심'){alert.className='notice danger';alert.textContent='통증 의심 신호는 반복되면 수의사 상담을 권장합니다.'}renderCameraAnalysis(intent)}
-function cameraMetrics(intent){const tail=$('tail')?.value||'보통',mouth=$('mouth')?.value||'보통',posture=$('posture')?.value||'편안함',gaze=$('gaze')?.value||'보호자 응시',temp=profile().temperament;
-  const live=!!videoStream;
-  const motion=live?cameraState.motion:30;
-  let dog=live?(cameraState.dog||82):62;
-  let tailWag=tail==='흔듦'?86:tail==='아래로'?22:tail==='말림'?12:(live?cameraState.tail:48);
-  let gazeOwner=gaze==='보호자 응시'?88:gaze==='피함'?18:gaze==='낯선 대상 응시'?28:(live?cameraState.gaze:52);
-  let stress=posture==='경직'?82:posture==='낮게 웅크림'?70:mouth==='혀 내밀고 헥헥'?66:tail==='말림'?76:(live?cameraState.stress:24);
-  let guard=gaze==='낯선 대상 응시'?84:posture==='경직'?68:(live?cameraState.guard:18);
-  let anger=['불만','짜증','소유욕','질투','강한 경고'].includes(intent)?(intent==='강한 경고'?92:intent==='짜증'?76:64):(live?cameraState.anger:12);
-  let temperamentBias=temp==='angry'?82:temp==='quiet'?64:temp==='vocal'?38:temp==='puppy'?28:50;
-  if(intent==='행복'||intent==='놀고 싶음')tailWag=Math.max(tailWag,78);
-  if(intent==='불안')stress=Math.max(stress,70);
-  if(intent==='경계')guard=Math.max(guard,76);
-  if(intent==='강한 경고'){guard=Math.max(guard,88);stress=Math.max(stress,86);anger=Math.max(anger,90)}
-  if(temp==='angry'){guard=Math.max(guard,58);anger=Math.max(anger,42)}
-  if(temp==='quiet'&&stress>45)guard=Math.max(guard,44);
-  if(temp==='vocal'&&!['강한 경고','짜증'].includes(intent))anger=Math.max(8,anger-16);
-  if(temp==='puppy'&&!['강한 경고'].includes(intent))anger=Math.max(6,anger-20);
-  return [{k:'강아지 감지',v:dog},{k:'꼬리/몸 움직임',v:tailWag},{k:'보호자 주시',v:gazeOwner},{k:'긴장도',v:stress},{k:'경계 신호',v:guard},{k:'화남/불만 신호',v:anger},{k:'성격 보정 반영',v:temperamentBias}].map(x=>({...x,v:clamp(Math.round(x.v),0,99)}))}
-function metricHtml(m){return `<div class="metric-pill"><span>${m.k}<b>${m.v}%</b></span><div class="metric-bar"><i style="width:${m.v}%"></i></div></div>`}
-function panelHtml(m){return `<div class="pro-row"><div class="top"><span>${m.k}</span><b>${m.v}%</b></div><div class="probar"><i style="width:${m.v}%"></i></div></div>`}
-function renderCameraAnalysis(intent='행복'){const metrics=cameraMetrics(intent);if($('cameraOverlay'))$('cameraOverlay').innerHTML=metrics.slice(0,4).map(metricHtml).join('');if($('cameraProPanel'))$('cameraProPanel').innerHTML=metrics.map(panelHtml).join('')}
-function setCameraVisual(on){if($('dogDetectBox'))$('dogDetectBox').style.display=on?'block':'none';if($('cameraOverlay'))$('cameraOverlay').style.display=on?'grid':'none';if($('cameraCanvas'))$('cameraCanvas').style.display=on?'block':'none';if($('cameraTechBadge'))$('cameraTechBadge').style.display=on?'flex':'none';if($('cameraBtn'))$('cameraBtn').textContent=on?'카메라 끄기':'카메라 켜기';if($('switchCameraBtn'))$('switchCameraBtn').disabled=!on;renderCameraAnalysis(lastResult?.intent||'행복')}
-function addLog(r){logs.unshift(r);logs=logs.slice(0,50);localStorage.setItem('meongtalkLogsMobile',JSON.stringify(logs));renderLogs()}
-function renderLogs(){const list=logs.map(r=>`<div class="log-item"><div class="log-icon">${r.emoji||'🐶'}</div><div><div class="log-text">${r.sentence.replace(/[“”]/g,'')}</div><div class="log-time">${new Date(r.time).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})} · ${r.intent} · ${r.conf}%</div></div></div>`).join('')||'<div class="empty">아직 기록이 없어요.</div>';$('historyList').innerHTML=list;$('historyPreview').innerHTML=list||'<div class="empty">아직 기록이 없어요.</div>'}
-function loadLogs(){try{logs=JSON.parse(localStorage.getItem('meongtalkLogsMobile')||'[]')}catch(e){logs=[]}renderLogs()}
-async function startAudio(){try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('이 브라우저에서는 getUserMedia를 사용할 수 없습니다. HTTPS 또는 localhost에서 실행해 주세요.');audioCtx=new (window.AudioContext||window.webkitAudioContext)();audioStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});source=audioCtx.createMediaStreamSource(audioStream);analyser=audioCtx.createAnalyser();analyser.fftSize=2048;freqAnalyser=audioCtx.createAnalyser();freqAnalyser.fftSize=2048;source.connect(analyser);source.connect(freqAnalyser);timeData=new Float32Array(analyser.fftSize);freqData=new Float32Array(freqAnalyser.frequencyBinCount);running=true;paused=false;timerStart=Date.now();$('deviceStatus').textContent='음성 분석 중';$('audioStatus').textContent='분석 중';$('runStatus').textContent='통역 중';startTimer();audioLoop();return true}catch(e){$('deviceStatus').textContent='마이크 오류';$('audioStatus').textContent='권한 필요';drawIdleSpectrum();alert('마이크를 사용할 수 없어요. 권한, HTTPS/localhost 실행 여부를 확인해 주세요.\n\n오류: '+e.message);return false}}
-function audioLoop(){if(!running)return;requestAnimationFrame(audioLoop);if(paused)return;analyser.getFloatTimeDomainData(timeData);freqAnalyser.getFloatFrequencyData(freqData);drawLiveSpectrum(timeData,freqData);const rms=Math.sqrt(timeData.reduce((s,v)=>s+v*v,0)/timeData.length),db=20*Math.log10(rms||1e-8),gate=+$('gate').value+(10-+$('sensitivity').value)*.8;if(db>gate){if(!eventStart)eventStart=performance.now()}else if(eventStart&&performance.now()-eventStart>230){const now=performance.now(),duration=(now-eventStart)/1000;if(duration>.08){const p=pitch(timeData,audioCtx.sampleRate),sp=spectral(freqData,audioCtx.sampleRate),v={db,pitch:p,energy:rms,duration,zcr:zcr(timeData),centroid:sp.centroid,rolloff:sp.rolloff};const c=classify(v);updateUI(c.intent,c.pattern,v,c.voiceBias)}lastEvent=now;eventStart=0}const p=pitch(timeData,audioCtx.sampleRate);if(p)$('peakFreq').textContent=p+' Hz'}
-function rr(ctx,x,y,w,h,r){if(ctx.roundRect){ctx.roundRect(x,y,w,h,r);return}ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r)}
-function stopCameraLoop(){if(cameraAnim)cancelAnimationFrame(cameraAnim);cameraAnim=null;prevFrame=null}
-function startCameraLoop(){stopCameraLoop();const video=$('video'),canvas=$('cameraCanvas');if(!canvas||!video)return;camProbe=document.createElement('canvas');camProbe.width=128;camProbe.height=96;const pctx=camProbe.getContext('2d',{willReadFrequently:true});let smooth={motion:0,dog:78,tail:48,gaze:52,stress:20,guard:18,anger:10};const draw=()=>{if(!videoStream||video.readyState<2){cameraAnim=requestAnimationFrame(draw);return}const rect=video.getBoundingClientRect(),dpr=devicePixelRatio||1;canvas.width=Math.max(1,Math.round(rect.width*dpr));canvas.height=Math.max(1,Math.round(rect.height*dpr));const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,rect.width,rect.height);
-  let brightness=0,contrast=0,diff=0,edge=0;try{pctx.drawImage(video,0,0,camProbe.width,camProbe.height);const img=pctx.getImageData(0,0,camProbe.width,camProbe.height).data;let sum=0,sum2=0,n=0;if(prevFrame){for(let i=0;i<img.length;i+=16){const lum=.299*img[i]+.587*img[i+1]+.114*img[i+2];const pl=.299*prevFrame[i]+.587*prevFrame[i+1]+.114*prevFrame[i+2];sum+=lum;sum2+=lum*lum;diff+=Math.abs(lum-pl);n++;}}else{for(let i=0;i<img.length;i+=16){const lum=.299*img[i]+.587*img[i+1]+.114*img[i+2];sum+=lum;sum2+=lum*lum;n++;}}brightness=sum/Math.max(1,n);contrast=Math.sqrt(Math.max(0,sum2/Math.max(1,n)-brightness*brightness));diff=diff/Math.max(1,n);prevFrame=new Uint8ClampedArray(img);edge=clamp((contrast-18)*2.2,0,99)}catch(e){}
-  const motion=clamp(diff*5.2,0,99);const dog=clamp(70+edge*.22+motion*.16,58,98);const t=Date.now()/700;const tailSignal=clamp(28+motion*.72+Math.abs(Math.sin(t*1.8))*18,0,99);const gazeSignal=clamp(50+(brightness>70?10:0)+(motion<35?18:-8)+Math.sin(t*.55)*8,0,99);const stressSignal=clamp((motion>78?45:16)+(brightness<35?16:0)+(contrast>55?20:0),0,99);const guardSignal=clamp(stressSignal*.55+(motion<10?20:0)+(profile().temperament==='angry'?22:0),0,99);const angerSignal=clamp(guardSignal*.42+(stressSignal>65?22:0)+(profile().temperament==='angry'?15:0),0,99);
-  [['motion',motion],['dog',dog],['tail',tailSignal],['gaze',gazeSignal],['stress',stressSignal],['guard',guardSignal],['anger',angerSignal]].forEach(([k,v])=>{smooth[k]=smooth[k]*.82+v*.18;cameraState[k]=clamp(Math.round(smooth[k]),0,99)});cameraState.brightness=Math.round(brightness);cameraState.contrast=Math.round(contrast);
-  const x=rect.width*.11+Math.sin(t)*5,y=rect.height*.14+Math.cos(t*.8)*4,w=rect.width*.66,h=rect.height*.61;ctx.lineWidth=3;ctx.strokeStyle='rgba(255,117,143,.95)';ctx.fillStyle='rgba(255,255,255,.88)';ctx.beginPath();rr(ctx,x,y,w,h,22);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.92)';ctx.beginPath();rr(ctx,x+8,y-30,150,24,12);ctx.fill();ctx.fillStyle='#e24162';ctx.font='800 12px system-ui';ctx.fillText(`🐶 강아지 감지 ${cameraState.dog}%`,x+18,y-14);
-  const head={x:x+w*.72,y:y+h*.28},body={x:x+w*.46,y:y+h*.52},tail={x:x+w*.18,y:y+h*.55};ctx.strokeStyle='rgba(116,211,194,.95)';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(head.x,head.y,Math.max(14,18+Math.sin(t)*3),0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.ellipse(body.x,body.y,w*.18,h*.16,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(head.x-12,head.y+18);ctx.lineTo(body.x+20,body.y-10);ctx.stroke();ctx.fillStyle='rgba(116,211,194,.95)';ctx.font='800 11px system-ui';ctx.fillText(`얼굴/주시 ${cameraState.gaze}%`,head.x-34,head.y-25);
-  ctx.strokeStyle='rgba(255,190,104,.95)';ctx.lineWidth=3;const wag=Math.sin(t*4)*(cameraState.tail/99)*24;ctx.beginPath();ctx.moveTo(tail.x,tail.y);ctx.quadraticCurveTo(tail.x-42,tail.y-18+wag,tail.x-28,tail.y-70+wag*.4);ctx.stroke();ctx.fillStyle='rgba(255,160,90,.95)';ctx.font='800 11px system-ui';ctx.fillText(`꼬리/몸 ${cameraState.tail}%`,tail.x-38,tail.y+34);
-  ctx.strokeStyle=cameraState.stress>65?'rgba(237,70,101,.95)':'rgba(255,190,104,.72)';ctx.setLineDash([5,5]);ctx.beginPath();rr(ctx,x-8,y-8,w+16,h+16,28);ctx.stroke();ctx.setLineDash([]);
-  renderCameraAnalysis(lastResult?.intent||'행복');cameraAnim=requestAnimationFrame(draw)};draw()}
-async function startCamera(){try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('이 브라우저에서는 카메라를 사용할 수 없습니다. HTTPS 또는 localhost에서 실행해 주세요.');if(videoStream)videoStream.getTracks().forEach(t=>t.stop());
-  const constraintsList=[{video:{facingMode:{ideal:camFacing},width:{ideal:1280},height:{ideal:720}},audio:false},{video:true,audio:false}];let lastErr=null;
-  for(const cons of constraintsList){try{videoStream=await navigator.mediaDevices.getUserMedia(cons);break}catch(err){lastErr=err}}
-  if(!videoStream)throw lastErr||new Error('카메라 스트림을 열 수 없습니다.');
-  const video=$('video');video.srcObject=videoStream;video.muted=true;video.playsInline=true;await video.play().catch(()=>{});
-  $('cameraEmpty').style.display='none';$('cameraStatus').textContent='분석 중';$('cameraChips').innerHTML='<span class="chip">🐶 강아지 영역 감지</span><span class="chip">🦴 MediaPipe 스타일 관절/영역 추적</span><span class="chip">👀 보호자 주시 점수</span><span class="chip">🐕 꼬리·몸 움직임 점수</span><span class="chip">😡 긴장·경고 신호 체크</span>';
-  setCameraVisual(true);startCameraLoop();return true}catch(e){$('cameraStatus').textContent='오류';$('cameraEmpty').style.display='grid';$('cameraEmpty').innerHTML='🐶<br>카메라를 켤 수 없어요<br><span class="small">권한 허용, HTTPS/localhost 실행, 다른 앱의 카메라 사용 여부를 확인해 주세요.</span>';$('cameraChips').innerHTML='<span class="chip">카메라 권한 확인 필요</span>';setCameraVisual(false);stopCameraLoop();console.warn(e);return false}}
-function stopCamera(){stopCameraLoop();if(videoStream)videoStream.getTracks().forEach(t=>t.stop());videoStream=null;$('video').srcObject=null;$('cameraEmpty').style.display='grid';$('cameraEmpty').innerHTML='🐶<br>카메라를 켜면 행동 관찰을 시작해요';$('cameraStatus').textContent='대기';$('cameraChips').innerHTML='<span class="chip">카메라 대기 중</span>';setCameraVisual(false)}
-function toggleCamera(){videoStream?stopCamera():startCamera()}
-async function startAll(){nav('translate');await startAudio()}
-function stopAll(){running=false;paused=false;if(audioStream)audioStream.getTracks().forEach(t=>t.stop());if(audioCtx)audioCtx.close().catch(()=>{});audioStream=null;audioCtx=null;$('deviceStatus').textContent='종료됨';$('audioStatus').textContent='대기';$('runStatus').textContent='대기 중';clearInterval(timerTick);$('timer').textContent='00:00';drawIdleSpectrum()}
-function startTimer(){clearInterval(timerTick);timerTick=setInterval(()=>{if(!running||paused)return;const sec=Math.floor((Date.now()-timerStart)/1000),m=String(Math.floor(sec/60)).padStart(2,'0'),s=String(sec%60).padStart(2,'0');$('timer').textContent=`${m}:${s}`},500)}
-function sample(){const samples=[{intent:'관심받고 싶음',pattern:'높고 애교 섞인 소리',pitch:620,db:-38},{intent:'산책 요구',pattern:'짧고 또렷한 멍',pitch:410,db:-31},{intent:'배고픔',pattern:'보통 멍',pitch:340,db:-35},{intent:'더움/스트레스',pattern:'헥헥 숨찬 소리',pitch:230,db:-37},{intent:'경계',pattern:'낮고 조심스러운 소리',pitch:130,db:-34},{intent:'불만',pattern:'낮고 조심스러운 소리',pitch:155,db:-36},{intent:'짜증',pattern:'짧고 또렷한 멍',pitch:210,db:-31},{intent:'강한 경고',pattern:'낮고 조심스러운 소리',pitch:120,db:-29},{intent:'행복',pattern:'짧고 또렷한 멍',pitch:450,db:-30}];const s=pick(samples),v={pitch:s.pitch,db:s.db,duration:.7,zcr:.08,centroid:1700};const b=applyVoiceTemperament(s.intent,s.pattern,v);updateUI(b.intent,s.pattern,v,b);nav('home');}
-
-function personalityTest(temp){if($('temperament'))$('temperament').value=temp;applyProfile();const v={pitch: temp==='angry'?135:(temp==='puppy'?620:(temp==='quiet'?220:390)),db: temp==='quiet'?-43:(temp==='angry'?-30:-34),duration: temp==='angry'?1.05:(temp==='vocal'?.55:.72),zcr: temp==='angry'?.11:.075,centroid: temp==='puppy'?2200:1500};const base=temp==='angry'?'경계':(temp==='quiet'?'관심받고 싶음':(temp==='vocal'?'짜증':'불만'));const pattern=temp==='angry'?'낮고 조심스러운 소리':(temp==='puppy'?'높고 애교 섞인 소리':'짧고 또렷한 멍');const b=applyVoiceTemperament(base,pattern,v);updateUI(b.intent,pattern,v,b);nav('translate');}
-function init(){loadProfile();loadLogs();renderEmotions('행복',87);renderBehavior('행복');$('quickSay').innerHTML=['산책 가고 싶어!','배고파 언니!','놀아줘 언니~','사랑해 언니! 💕'].map(x=>`<span>${x}</span>`).join('');document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>nav(b.dataset.tab)));$('saveProfileBtn').addEventListener('click',saveProfile);$('startBtn').addEventListener('click',startAll);$('pauseBtn').addEventListener('click',()=>{paused=!paused;$('pauseBtn').textContent=paused?'다시 시작':'잠시 멈춤';$('deviceStatus').textContent=paused?'잠시 멈춤':'음성 분석 중'});$('stopBtn').addEventListener('click',stopAll);$('sampleBtn').addEventListener('click',sample);$('testQuietBtn')&&$('testQuietBtn').addEventListener('click',()=>personalityTest('quiet'));$('testVocalBtn')&&$('testVocalBtn').addEventListener('click',()=>personalityTest('vocal'));$('testAngryBtn')&&$('testAngryBtn').addEventListener('click',()=>personalityTest('angry'));$('testPuppyBtn')&&$('testPuppyBtn').addEventListener('click',()=>personalityTest('puppy'));$('clearHistoryBtn').addEventListener('click',()=>{logs=[];localStorage.removeItem('meongtalkLogsMobile');renderLogs()});['tail','mouth','posture','gaze','context','temperament','correctionStrength','dailyBarkLevel'].forEach(id=>$(id)&&$(id).addEventListener('change',()=>{applyProfile();renderBehavior(lastResult?.intent||'행복')}));['ownerName','dogName','breed','correctionStrength'].forEach(id=>$(id).addEventListener('input',applyProfile));animateIdle();if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}
-window.addEventListener('DOMContentLoaded',init);
+function spectral(ff,rate){let sum=0,wsum=0;for(let i=0;i<ff.length;i++){const mag=Math.pow(10,ff[i]/20),freq=i*rate/(2*ff.length);sum+=mag;wsum+=mag*freq}return {centroid:sum?wsum/sum:0}}
+function biasScores(v,intent){const p=profile();let social=45,play=35,anxiety=25,guard=25,anger=12,stress=15;if(v.pitch>500){social+=22;play+=12}if(v.pitch>0&&v.pitch<180){guard+=22;anger+=12}if(v.db>-42){play+=10}if(v.duration>1.1)anxiety+=18;if(v.zcr>.1){stress+=18;anxiety+=8}if(['경계','불만','짜증','소유욕','강한 경고'].includes(intent)){guard+=22;anger+=12}if(['놀고 싶음','행복','관심받고 싶음'].includes(intent)){social+=18;play+=16}if(p.temperament==='quiet'){anxiety+=18;guard+=18;social-=8}if(p.temperament==='vocal'){social+=22;play+=20;guard-=18;anger-=16}if(p.temperament==='angry'){guard+=30;anger+=30;social-=12;if(v.pitch<180||v.db>-42)anger+=16}if(p.temperament==='puppy'){social+=26;play+=18;guard-=12;anger-=18}if(p.dailyBark==='low'){anxiety+=8;guard+=8}if(p.dailyBark==='high'){social+=8;play+=8;guard-=8;anger-=8}const mix=(b,a)=>clamp(Math.round(b+(a-b)*(p.correction/100)),0,99);return {social:mix(50,social),play:mix(45,play),anxiety:mix(25,anxiety),guard:mix(25,guard),anger:mix(15,anger),stress:mix(20,stress)}}
+function applyTemperament(intent,pattern,v){const p=profile(),s=biasScores(v,intent);let corrected=intent,reason=tHelp(p.temperament);if(p.temperament==='quiet'){if(s.guard>=55&&!['산책 요구','배고픔','더움/스트레스'].includes(corrected))corrected='경계';if(s.anxiety>=52&&['관심받고 싶음','놀고 싶음'].includes(corrected))corrected='불안'}if(p.temperament==='vocal'){if(['경계','불만','짜증'].includes(corrected)&&s.anger<62)corrected=s.play>s.social?'놀고 싶음':'관심받고 싶음';if(corrected==='강한 경고'&&s.anger<72)corrected='불만'}if(p.temperament==='angry'){if(s.anger>=62)corrected='강한 경고';else if(s.guard>=56&&['관심받고 싶음','놀고 싶음','행복'].includes(corrected))corrected='경계';else if(s.anger>=48&&!['산책 요구','배고픔','더움/스트레스'].includes(corrected))corrected=s.anger>=56?'짜증':'불만'}if(p.temperament==='puppy'){if(['불만','짜증','경계'].includes(corrected)&&s.anger<60)corrected=s.play>=s.social?'놀고 싶음':'관심받고 싶음'}return {intent:corrected,baseIntent:intent,pattern,scores:s,reason}}
+function renderBias(d){d=d||{scores:{social:50,play:45,anxiety:25,guard:25,anger:15,stress:20},reason:'성격 타입에 따라 같은 짖음도 다르게 해석해요.'};$('voiceBiasLabel').textContent=tLabel(profile().temperament);$('voiceBiasNote').textContent=d.reason;const arr=[['관심/애착',d.scores.social],['놀이/흥분',d.scores.play],['불안',d.scores.anxiety],['경계',d.scores.guard],['화남/불만',d.scores.anger],['스트레스',d.scores.stress]];$('voiceBiasGrid').innerHTML=arr.map(x=>`<div class="vc-pill"><span><em>${x[0]}</em><b>${x[1]}%</b></span><div class="vc-bar"><i style="width:${x[1]}%"></i></div></div>`).join('')}
+function classify(v){let pattern='보통 멍',intent='관심받고 싶음';if(v.pitch>520||(v.centroid>1900&&v.db<-34)){pattern='높고 애교 섞인 소리';intent='관심받고 싶음'}if(v.pitch>0&&v.pitch<170&&v.duration>.7){pattern='낮고 조심스러운 소리';intent='경계'}if(v.duration>1.5&&v.zcr<.07){pattern='길게 부르는 소리';intent='불안'}if(v.zcr>.11&&v.duration>1.0){pattern='헥헥 숨찬 소리';intent='더움/스트레스'}if(v.duration<.75&&v.db>-42){pattern='짧고 또렷한 멍';intent='놀고 싶음'}const ctx=$('context').value,tail=$('tail').value,mouth=$('mouth').value,posture=$('posture').value,gaze=$('gaze').value;if(ctx==='식사 시간 근처')intent='배고픔';if(ctx==='산책 시간 근처'||posture==='문 앞 대기'||gaze==='문/밖 응시')intent='산책 요구';if(ctx==='더운 환경'||mouth==='혀 내밀고 헥헥')intent='더움/스트레스';if(ctx==='낯선 사람/소리'||gaze==='낯선 대상 응시')intent=pattern==='낮고 조심스러운 소리'?'경계':'불안';if(ctx==='장난감/간식 소유')intent='소유욕';if(tail==='흔듦'&&['놀고 싶음','관심받고 싶음'].includes(intent))intent=Math.random()>.5?'행복':'놀고 싶음';if(tail==='말림'||posture==='낮게 웅크림')intent='불안';return applyTemperament(intent,pattern,v)}
+function updateResult(r,v){lastResult=r;const p=profile(),emoji=emojiMap[r.intent]||'🐶',conf=clamp(Math.round(58+Math.min(24,Math.abs(v.db+45))+(v.pitch?10:0)+Math.random()*8),45,95);const sentence=pick(sentenceMap[r.intent]||sentenceMap['관심받고 싶음']).replaceAll('{o}',p.owner);$('sentence').textContent='“'+sentence+'”';$('confidence').textContent=`신뢰도 ${conf}% · ${r.pattern} · 기본 추정 ${r.baseIntent} → 보정 ${r.intent}`;$('profileMood').textContent=`${emoji} ${r.intent}`;$('emotionEmoji').textContent=emoji;$('emotionName').textContent=r.intent;$('emotionConf').textContent=`${conf}% · 참고용 추정`;$('peakFreq').textContent=(v.pitch||Math.round(v.centroid))+' Hz';$('voicePattern').textContent=r.pattern;renderEmotions(r.intent,conf);renderBehavior(r.intent);renderBias(r);addLog({intent:r.intent,sentence,conf,pattern:r.pattern})}
+function renderEmotions(intent,conf){const keys=Object.keys(emojiMap);let top=[intent,...keys.filter(k=>k!==intent).sort(()=>Math.random()-.5).slice(0,5)];$('emotionMini').innerHTML=top.map((k,i)=>`<div class="emo ${i===0?'hot':''}"><b>${emojiMap[k]}</b>${k}<br>${i===0?conf:clamp(conf-15-i*6,10,80)}%</div>`).join('')}
+function renderBehavior(intent){const items=[['현재 의도',intent],['상황 보정',$('context').value],['꼬리/자세',$('tail').value+' · '+$('posture').value],['시선/호흡',$('gaze').value+' · '+$('mouth').value]];$('behaviorList').innerHTML=items.map(x=>`<div class="item"><b>${x[0]}</b><span class="tag">${x[1]}</span></div>`).join('');const box=$('alertBox');box.className='notice';box.textContent='현재 위험 신호 없음. 편안하게 지켜봐도 좋아요.';if(['불안','경계','더움/스트레스'].includes(intent)){box.className='notice warn';box.textContent='불안·경계·스트레스 가능성이 있어요. 자극을 줄이고 물/휴식/거리두기를 확인해 주세요.'}if(['강한 경고','통증 의심'].includes(intent)){box.className='notice danger';box.textContent='강한 경고 또는 통증 의심 신호입니다. 만지지 말고 안전거리를 두며 반복되면 전문가 상담을 권장해요.'}}
+async function startAudio(){try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('HTTPS 또는 localhost에서 실행해 주세요.');audioCtx=new (window.AudioContext||window.webkitAudioContext)();audioStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});source=audioCtx.createMediaStreamSource(audioStream);analyser=audioCtx.createAnalyser();analyser.fftSize=2048;freqAnalyser=audioCtx.createAnalyser();freqAnalyser.fftSize=2048;source.connect(analyser);source.connect(freqAnalyser);timeData=new Float32Array(analyser.fftSize);freqData=new Float32Array(freqAnalyser.frequencyBinCount);running=true;paused=false;timerStart=Date.now();$('audioStatus').textContent='분석 중';$('runStatus').textContent='통역 중';startTimer();audioLoop()}catch(e){$('audioStatus').textContent='권한 필요';alert('마이크를 사용할 수 없어요. 권한, HTTPS/localhost 실행 여부를 확인해 주세요.\n\n오류: '+e.message)}}
+function audioLoop(){if(!running)return;requestAnimationFrame(audioLoop);if(paused)return;analyser.getFloatTimeDomainData(timeData);freqAnalyser.getFloatFrequencyData(freqData);drawLive(timeData,freqData);const rms=Math.sqrt(timeData.reduce((s,v)=>s+v*v,0)/timeData.length),db=20*Math.log10(rms||1e-8),gate=+$('gate').value,sens=+$('sensitivity').value,threshold=gate+(10-sens)*1.5;if(db>threshold){if(!eventStart)eventStart=Date.now()}else if(eventStart){const duration=(Date.now()-eventStart)/1000;if(duration>.18&&Date.now()-lastEvent>1200){const pch=pitch(Array.from(timeData),audioCtx.sampleRate),sp=spectral(freqData,audioCtx.sampleRate),v={db,duration,pitch:pch,centroid:sp.centroid,zcr:zcr(timeData)};updateResult(classify(v),v);lastEvent=Date.now()}eventStart=0}}
+function startTimer(){clearInterval(timerTick);timerTick=setInterval(()=>{if(!running||paused)return;const sec=Math.floor((Date.now()-timerStart)/1000);$('timer').textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')},500)}
+function stopAll(){running=false;paused=false;clearInterval(timerTick);if(audioStream)audioStream.getTracks().forEach(t=>t.stop());if(audioCtx)audioCtx.close().catch(()=>{});audioStream=null;audioCtx=null;$('audioStatus').textContent='대기';$('runStatus').textContent='대기 중';$('pauseBtn').textContent='잠시 멈춤';$('timer').textContent='00:00';drawIdleSpectrum()}
+function sample(v={db:-38,duration:.55,pitch:620,centroid:2200,zcr:.08}){const r=classify(v);updateResult(r,v);nav('translate')}
+function personalityTest(t){$('temperament').value=t;applyProfile();const samples={quiet:{db:-44,duration:.9,pitch:230,centroid:1200,zcr:.06},vocal:{db:-36,duration:.45,pitch:520,centroid:2100,zcr:.09},angry:{db:-32,duration:.7,pitch:135,centroid:900,zcr:.13},puppy:{db:-42,duration:.42,pitch:680,centroid:2400,zcr:.07}};sample(samples[t])}
+function addLog(item){logs.unshift({...item,time:new Date().toLocaleString('ko-KR')});logs=logs.slice(0,30);localStorage.setItem('meongtalkLogsClean',JSON.stringify(logs));renderLogs()}
+function loadLogs(){try{logs=JSON.parse(localStorage.getItem('meongtalkLogsClean')||'[]')}catch(e){logs=[]}renderLogs()}
+function renderLogs(){const html=logs.length?logs.map(l=>`<div class="log-item"><div class="log-icon">${emojiMap[l.intent]||'🐶'}</div><div><div class="log-text">${l.sentence}</div><div class="log-time">${l.time} · ${l.intent} · ${l.conf}% · ${l.pattern}</div></div></div>`).join(''):'<div class="empty">기록이 아직 없어요.</div>';$('historyList').innerHTML=html;$('historyPreview').innerHTML=html}
+function init(){loadProfile();loadLogs();renderEmotions('행복',70);renderBehavior('행복');$('quickSay').innerHTML=['산책 가고 싶어!','배고파 언니!','놀아줘 언니~','사랑해 언니! 💕'].map(x=>`<span>${x}</span>`).join('');document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>nav(b.dataset.tab)));$('saveProfileBtn').addEventListener('click',saveProfile);$('startBtn').addEventListener('click',()=>{nav('translate');startAudio()});$('pauseBtn').addEventListener('click',()=>{paused=!paused;$('pauseBtn').textContent=paused?'다시 시작':'잠시 멈춤';$('audioStatus').textContent=paused?'잠시 멈춤':'분석 중'});$('stopBtn').addEventListener('click',stopAll);$('sampleBtn').addEventListener('click',()=>sample());['testQuietBtn','testVocalBtn','testAngryBtn','testPuppyBtn'].forEach((id,i)=>$(id).addEventListener('click',()=>personalityTest(['quiet','vocal','angry','puppy'][i])));$('clearHistoryBtn').addEventListener('click',()=>{logs=[];localStorage.removeItem('meongtalkLogsClean');renderLogs()});['tail','mouth','posture','gaze','context','temperament','correctionStrength','dailyBarkLevel'].forEach(id=>$(id).addEventListener('change',()=>{applyProfile();renderBehavior(lastResult?.intent||'행복')}));['ownerName','dogName','breed','correctionStrength'].forEach(id=>$(id).addEventListener('input',applyProfile));animateIdle();if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{})}
+window.addEventListener('load',init);
 </script>
 </body>
 </html>
