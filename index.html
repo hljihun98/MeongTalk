@@ -79,6 +79,27 @@ main{padding:14px 14px 0}.section{display:none;animation:rise .25s ease}.section
 .bottom-nav{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
 .nav-btn{min-width:0;text-align:center;}
 @media (min-width:1100px){.bottom-nav{grid-template-columns:1fr!important;}}
+
+/* ===== 2026-06 responsive + camera tracking fix ===== */
+@media (min-width:900px){
+  main{max-width:1180px;margin:0 auto;padding:22px 22px 22px 116px;}
+  #camera .card:first-child{grid-column:span 8!important}
+  #camera .card:nth-child(2){grid-column:span 4!important}
+  #camera .card:nth-child(3){grid-column:span 12!important}
+  #translate .speech-card{grid-column:span 8!important}
+  #translate .card:nth-child(2){grid-column:span 4!important}
+  .camera-overlay{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .metric-pill{min-width:0}
+}
+@media (min-width:1280px){
+  main{max-width:1240px;}
+  #home .speech-card{grid-column:span 8!important}
+  #home .hero-card{grid-column:span 4!important}
+}
+.camera-tech-badge{position:absolute;left:12px;top:12px;display:flex;gap:6px;flex-wrap:wrap;z-index:3}
+.camera-tech-badge span{background:rgba(255,255,255,.92);border:1px solid #ffd5df;border-radius:999px;padding:6px 8px;color:#6b5058;font-size:10.5px;font-weight:1000;box-shadow:0 5px 13px rgba(90,45,55,.08)}
+.camera-overlay{z-index:4}.camera-canvas{z-index:2}.dog-detect-box{z-index:3}.rec{z-index:5}.camera-empty{z-index:1}
+
 </style>
 </head>
 <body>
@@ -166,7 +187,7 @@ main{padding:14px 14px 0}.section{display:none;animation:rise .25s ease}.section
     <section id="camera" class="section">
       <div class="card">
         <div class="status-row"><h2>📷 실시간 카메라</h2><span class="tag mint" id="cameraStatus">대기</span></div>
-        <div class="video-wrap"><video id="video" autoplay playsinline muted></video><canvas id="cameraCanvas" class="camera-canvas"></canvas><div class="camera-empty" id="cameraEmpty">🐶<br>카메라를 켜면 행동 관찰을 시작해요</div><div class="dog-detect-box" id="dogDetectBox"><div class="dog-detect-label" id="dogDetectLabel">🐶 봄이 감지 중</div></div><div class="camera-overlay" id="cameraOverlay"></div><div class="rec">● LIVE</div></div>
+        <div class="video-wrap"><video id="video" autoplay playsinline muted></video><canvas id="cameraCanvas" class="camera-canvas"></canvas><div class="camera-tech-badge" id="cameraTechBadge" style="display:none"><span>MediaPipe-style Pose</span><span>Motion Flow</span><span>Gaze Score</span></div><div class="camera-empty" id="cameraEmpty">🐶<br>카메라를 켜면 행동 관찰을 시작해요</div><div class="dog-detect-box" id="dogDetectBox"><div class="dog-detect-label" id="dogDetectLabel">🐶 봄이 감지 중</div></div><div class="camera-overlay" id="cameraOverlay"></div><div class="rec">● LIVE</div></div>
         <div class="cam-actions"><button class="btn wide" id="cameraBtn">카메라 켜기</button><button class="btn2" id="switchCameraBtn">전환</button></div>
       </div>
       <div class="card"><h2>🐕 관찰 상태</h2><div class="chips" id="cameraChips"></div></div>
@@ -198,7 +219,7 @@ main{padding:14px 14px 0}.section{display:none;animation:rise .25s ease}.section
 const $=id=>document.getElementById(id);
 const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
 const pick=a=>a[Math.floor(Math.random()*a.length)];
-let audioCtx=null,audioStream=null,videoStream=null,source=null,analyser=null,freqAnalyser=null,timeData=null,freqData=null,running=false,paused=false,eventStart=0,lastEvent=0,logs=[],timerStart=0,timerTick=null,camFacing='environment',idleAnim=null,lastResult=null,cameraAnim=null,camProbe=null,prevFrame=null,cameraState={motion:0,dog:0,tail:0,gaze:0,stress:0};
+let audioCtx=null,audioStream=null,videoStream=null,source=null,analyser=null,freqAnalyser=null,timeData=null,freqData=null,running=false,paused=false,eventStart=0,lastEvent=0,logs=[],timerStart=0,timerTick=null,camFacing='environment',idleAnim=null,lastResult=null,cameraAnim=null,camProbe=null,prevFrame=null,cameraState={motion:0,dog:0,tail:0,gaze:0,stress:0,guard:0,anger:0,brightness:0,contrast:0,face:0,tailPhase:0};
 const emotionList=['관심받고 싶음','행복','편안함','배고픔','산책 요구','놀고 싶음','졸림','불안','경계','불만','짜증','소유욕','질투','강한 경고','더움/스트레스','통증 의심'];
 const emojiMap={'관심받고 싶음':'🥺','행복':'😊','편안함':'😌','배고픔':'🍚','산책 요구':'🐾','놀고 싶음':'🎾','졸림':'😴','불안':'🥺','경계':'👀','불만':'😕','짜증':'😤','소유욕':'🧸','질투':'😾','강한 경고':'🚨','더움/스트레스':'💧','통증 의심':'🏥'};
 const cuteSentences={
@@ -292,40 +313,50 @@ function updateUI(intent,pattern,v,voiceBias){const p=profile(),em=emojiMap[inte
 function renderEmotions(top,conf){const vals=emotionList.slice(0,8).map(e=>({e,val:e===top?conf:Math.round(5+Math.random()*45)}));$('emotionMini').innerHTML=vals.map(x=>`<div class="emo ${x.e===top?'hot':''}"><b>${emojiMap[x.e]||'🐾'}</b>${x.e}<br>${x.val}%</div>`).join('')}
 function renderBehavior(intent){const base=[];const tail=$('tail')?.value||'보통',mouth=$('mouth')?.value||'보통',posture=$('posture')?.value||'편안함',gaze=$('gaze')?.value||'보호자 응시';if(tail==='흔듦')base.push(['💗 꼬리를 흔들고 있어요','애정']);if(mouth==='혀 내밀고 헥헥')base.push(['💧 헥헥거리는 중이에요','더움']);if(posture==='문 앞 대기')base.push(['🚪 문 앞에서 기다려요','산책']);if(posture==='경직')base.push(['👀 몸이 조금 경직됐어요','주의']);if(gaze==='보호자 응시')base.push(['🥰 언니를 바라보고 있어요','관심']);if(gaze==='낯선 대상 응시')base.push(['👀 낯선 대상을 보고 있어요','경계']);if(!base.length)base.push(['🐾 편안하게 관찰 중이에요','안정']);$('behaviorList').innerHTML=base.slice(0,4).map(x=>`<div class="item"><span>${x[0]}</span><span class="tag soft">${x[1]}</span></div>`).join('');const alert=$('alertBox');alert.className='notice';alert.textContent='현재 위험 신호 없음. 편안하게 지켜봐도 좋아요.';if(['불안','경계','더움/스트레스','불만','짜증','소유욕','질투'].includes(intent)){alert.className='notice warn';alert.textContent=`${intent} 신호가 보여요. 같은 패턴이 반복되는지 살펴봐 주세요.`}if(intent==='강한 경고'){alert.className='notice danger';alert.textContent='강한 경고 신호예요. 만지지 말고 거리를 두며 진정 시간을 주세요.'}if(intent==='통증 의심'){alert.className='notice danger';alert.textContent='통증 의심 신호는 반복되면 수의사 상담을 권장합니다.'}renderCameraAnalysis(intent)}
 function cameraMetrics(intent){const tail=$('tail')?.value||'보통',mouth=$('mouth')?.value||'보통',posture=$('posture')?.value||'편안함',gaze=$('gaze')?.value||'보호자 응시',temp=profile().temperament;
-  const motion=cameraState.motion||0;
-  let dog=videoStream?Math.max(76,Math.min(98,cameraState.dog||88)):0;
-  let tailWag=tail==='흔듦'?88:tail==='보통'?Math.max(32,Math.round(motion*0.85)):tail==='아래로'?18:8;
-  let gazeOwner=gaze==='보호자 응시'?86:gaze==='문/밖 응시'?32:gaze==='낯선 대상 응시'?18:10;
-  let stress=mouth==='혀 내밀고 헥헥'?76:posture==='경직'?72:posture==='낮게 웅크림'?62:Math.max(18,Math.round(motion*0.42));
-  let guard=gaze==='낯선 대상 응시'?78:posture==='경직'?68:18;
-  let anger=['불만','짜증','소유욕','질투','강한 경고'].includes(intent)?(intent==='강한 경고'?92:intent==='짜증'?76:64):12;let temperamentBias=temp==='angry'?82:temp==='quiet'?64:temp==='vocal'?38:temp==='puppy'?28:50;
+  const live=!!videoStream;
+  const motion=live?cameraState.motion:30;
+  let dog=live?(cameraState.dog||82):62;
+  let tailWag=tail==='흔듦'?86:tail==='아래로'?22:tail==='말림'?12:(live?cameraState.tail:48);
+  let gazeOwner=gaze==='보호자 응시'?88:gaze==='피함'?18:gaze==='낯선 대상 응시'?28:(live?cameraState.gaze:52);
+  let stress=posture==='경직'?82:posture==='낮게 웅크림'?70:mouth==='혀 내밀고 헥헥'?66:tail==='말림'?76:(live?cameraState.stress:24);
+  let guard=gaze==='낯선 대상 응시'?84:posture==='경직'?68:(live?cameraState.guard:18);
+  let anger=['불만','짜증','소유욕','질투','강한 경고'].includes(intent)?(intent==='강한 경고'?92:intent==='짜증'?76:64):(live?cameraState.anger:12);
+  let temperamentBias=temp==='angry'?82:temp==='quiet'?64:temp==='vocal'?38:temp==='puppy'?28:50;
   if(intent==='행복'||intent==='놀고 싶음')tailWag=Math.max(tailWag,78);
   if(intent==='불안')stress=Math.max(stress,70);
   if(intent==='경계')guard=Math.max(guard,76);
-  if(videoStream && motion>55 && tail==='보통')tailWag=Math.max(tailWag,55);
-  if(temp==='angry'){guard=Math.max(guard,58);anger=Math.max(anger,42)}if(temp==='quiet'&&stress>45)guard=Math.max(guard,44);if(temp==='vocal'&&!['강한 경고','짜증'].includes(intent))anger=Math.max(8,anger-16);if(temp==='puppy'&&!['강한 경고'].includes(intent))anger=Math.max(6,anger-20);return [{k:'강아지 감지',v:dog},{k:'꼬리/몸 움직임',v:tailWag},{k:'보호자 주시',v:gazeOwner},{k:'긴장도',v:stress},{k:'경계 신호',v:guard},{k:'화남/불만 신호',v:anger},{k:'성격 보정 반영',v:temperamentBias}].map(x=>({...x,v:clamp(Math.round(x.v),0,99)}))}
+  if(intent==='강한 경고'){guard=Math.max(guard,88);stress=Math.max(stress,86);anger=Math.max(anger,90)}
+  if(temp==='angry'){guard=Math.max(guard,58);anger=Math.max(anger,42)}
+  if(temp==='quiet'&&stress>45)guard=Math.max(guard,44);
+  if(temp==='vocal'&&!['강한 경고','짜증'].includes(intent))anger=Math.max(8,anger-16);
+  if(temp==='puppy'&&!['강한 경고'].includes(intent))anger=Math.max(6,anger-20);
+  return [{k:'강아지 감지',v:dog},{k:'꼬리/몸 움직임',v:tailWag},{k:'보호자 주시',v:gazeOwner},{k:'긴장도',v:stress},{k:'경계 신호',v:guard},{k:'화남/불만 신호',v:anger},{k:'성격 보정 반영',v:temperamentBias}].map(x=>({...x,v:clamp(Math.round(x.v),0,99)}))}
 function metricHtml(m){return `<div class="metric-pill"><span>${m.k}<b>${m.v}%</b></span><div class="metric-bar"><i style="width:${m.v}%"></i></div></div>`}
 function panelHtml(m){return `<div class="pro-row"><div class="top"><span>${m.k}</span><b>${m.v}%</b></div><div class="probar"><i style="width:${m.v}%"></i></div></div>`}
 function renderCameraAnalysis(intent='행복'){const metrics=cameraMetrics(intent);if($('cameraOverlay'))$('cameraOverlay').innerHTML=metrics.slice(0,4).map(metricHtml).join('');if($('cameraProPanel'))$('cameraProPanel').innerHTML=metrics.map(panelHtml).join('')}
-function setCameraVisual(on){if($('dogDetectBox'))$('dogDetectBox').style.display=on?'block':'none';if($('cameraOverlay'))$('cameraOverlay').style.display=on?'grid':'none';if($('cameraCanvas'))$('cameraCanvas').style.display=on?'block':'none';if($('cameraBtn'))$('cameraBtn').textContent=on?'카메라 끄기':'카메라 켜기';if($('switchCameraBtn'))$('switchCameraBtn').disabled=!on;renderCameraAnalysis(lastResult?.intent||'행복')}
+function setCameraVisual(on){if($('dogDetectBox'))$('dogDetectBox').style.display=on?'block':'none';if($('cameraOverlay'))$('cameraOverlay').style.display=on?'grid':'none';if($('cameraCanvas'))$('cameraCanvas').style.display=on?'block':'none';if($('cameraTechBadge'))$('cameraTechBadge').style.display=on?'flex':'none';if($('cameraBtn'))$('cameraBtn').textContent=on?'카메라 끄기':'카메라 켜기';if($('switchCameraBtn'))$('switchCameraBtn').disabled=!on;renderCameraAnalysis(lastResult?.intent||'행복')}
 function addLog(r){logs.unshift(r);logs=logs.slice(0,50);localStorage.setItem('meongtalkLogsMobile',JSON.stringify(logs));renderLogs()}
 function renderLogs(){const list=logs.map(r=>`<div class="log-item"><div class="log-icon">${r.emoji||'🐶'}</div><div><div class="log-text">${r.sentence.replace(/[“”]/g,'')}</div><div class="log-time">${new Date(r.time).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})} · ${r.intent} · ${r.conf}%</div></div></div>`).join('')||'<div class="empty">아직 기록이 없어요.</div>';$('historyList').innerHTML=list;$('historyPreview').innerHTML=list||'<div class="empty">아직 기록이 없어요.</div>'}
 function loadLogs(){try{logs=JSON.parse(localStorage.getItem('meongtalkLogsMobile')||'[]')}catch(e){logs=[]}renderLogs()}
 async function startAudio(){try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('이 브라우저에서는 getUserMedia를 사용할 수 없습니다. HTTPS 또는 localhost에서 실행해 주세요.');audioCtx=new (window.AudioContext||window.webkitAudioContext)();audioStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});source=audioCtx.createMediaStreamSource(audioStream);analyser=audioCtx.createAnalyser();analyser.fftSize=2048;freqAnalyser=audioCtx.createAnalyser();freqAnalyser.fftSize=2048;source.connect(analyser);source.connect(freqAnalyser);timeData=new Float32Array(analyser.fftSize);freqData=new Float32Array(freqAnalyser.frequencyBinCount);running=true;paused=false;timerStart=Date.now();$('deviceStatus').textContent='음성 분석 중';$('audioStatus').textContent='분석 중';$('runStatus').textContent='통역 중';startTimer();audioLoop();return true}catch(e){$('deviceStatus').textContent='마이크 오류';$('audioStatus').textContent='권한 필요';drawIdleSpectrum();alert('마이크를 사용할 수 없어요. 권한, HTTPS/localhost 실행 여부를 확인해 주세요.\n\n오류: '+e.message);return false}}
 function audioLoop(){if(!running)return;requestAnimationFrame(audioLoop);if(paused)return;analyser.getFloatTimeDomainData(timeData);freqAnalyser.getFloatFrequencyData(freqData);drawLiveSpectrum(timeData,freqData);const rms=Math.sqrt(timeData.reduce((s,v)=>s+v*v,0)/timeData.length),db=20*Math.log10(rms||1e-8),gate=+$('gate').value+(10-+$('sensitivity').value)*.8;if(db>gate){if(!eventStart)eventStart=performance.now()}else if(eventStart&&performance.now()-eventStart>230){const now=performance.now(),duration=(now-eventStart)/1000;if(duration>.08){const p=pitch(timeData,audioCtx.sampleRate),sp=spectral(freqData,audioCtx.sampleRate),v={db,pitch:p,energy:rms,duration,zcr:zcr(timeData),centroid:sp.centroid,rolloff:sp.rolloff};const c=classify(v);updateUI(c.intent,c.pattern,v,c.voiceBias)}lastEvent=now;eventStart=0}const p=pitch(timeData,audioCtx.sampleRate);if(p)$('peakFreq').textContent=p+' Hz'}
+function rr(ctx,x,y,w,h,r){if(ctx.roundRect){ctx.roundRect(x,y,w,h,r);return}ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r)}
 function stopCameraLoop(){if(cameraAnim)cancelAnimationFrame(cameraAnim);cameraAnim=null;prevFrame=null}
-function startCameraLoop(){stopCameraLoop();const video=$('video'),canvas=$('cameraCanvas');if(!canvas||!video)return;camProbe=document.createElement('canvas');camProbe.width=96;camProbe.height=72;const pctx=camProbe.getContext('2d',{willReadFrequently:true});const draw=()=>{if(!videoStream||video.readyState<2){cameraAnim=requestAnimationFrame(draw);return}const rect=video.getBoundingClientRect(),dpr=devicePixelRatio||1;canvas.width=Math.max(1,Math.round(rect.width*dpr));canvas.height=Math.max(1,Math.round(rect.height*dpr));const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,rect.width,rect.height);
-  try{pctx.drawImage(video,0,0,camProbe.width,camProbe.height);const img=pctx.getImageData(0,0,camProbe.width,camProbe.height).data;let diff=0;if(prevFrame){for(let i=0;i<img.length;i+=16){diff+=Math.abs(img[i]-prevFrame[i])+Math.abs(img[i+1]-prevFrame[i+1])+Math.abs(img[i+2]-prevFrame[i+2])}diff=diff/(img.length/16)/3}else diff=0;prevFrame=new Uint8ClampedArray(img);cameraState.motion=clamp(Math.round(diff*3.2),0,99);cameraState.dog=videoStream?clamp(84+Math.round(cameraState.motion*.12),76,98):0}catch(e){}
-  const t=Date.now()/700;const x=rect.width*.12+Math.sin(t)*6,y=rect.height*.15+Math.cos(t*.8)*5,w=rect.width*.64,h=rect.height*.58;ctx.lineWidth=3;ctx.strokeStyle='rgba(255,117,143,.95)';ctx.fillStyle='rgba(255,255,255,.88)';ctx.beginPath();ctx.roundRect(x,y,w,h,22);ctx.stroke();ctx.font='700 12px system-ui';ctx.fillStyle='rgba(255,255,255,.92)';ctx.beginPath();ctx.roundRect(x+8,y-30,130,24,12);ctx.fill();ctx.fillStyle='#e24162';ctx.fillText(`🐶 강아지 ${cameraState.dog}%`,x+18,y-14);
-  ctx.strokeStyle='rgba(116,211,194,.95)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x+w*.82,y+h*.28,18+Math.sin(t)*3,0,Math.PI*2);ctx.stroke();ctx.fillStyle='rgba(116,211,194,.95)';ctx.font='700 11px system-ui';ctx.fillText('얼굴/주시',x+w*.72,y+h*.28-24);
-  ctx.strokeStyle='rgba(255,190,104,.95)';ctx.beginPath();ctx.moveTo(x+w*.18,y+h*.72);ctx.quadraticCurveTo(x+w*.08,y+h*.58+Math.sin(t*2)*10,x+w*.16,y+h*.45);ctx.stroke();ctx.fillStyle='rgba(255,160,90,.95)';ctx.fillText('꼬리/움직임',x+w*.06,y+h*.78);
+function startCameraLoop(){stopCameraLoop();const video=$('video'),canvas=$('cameraCanvas');if(!canvas||!video)return;camProbe=document.createElement('canvas');camProbe.width=128;camProbe.height=96;const pctx=camProbe.getContext('2d',{willReadFrequently:true});let smooth={motion:0,dog:78,tail:48,gaze:52,stress:20,guard:18,anger:10};const draw=()=>{if(!videoStream||video.readyState<2){cameraAnim=requestAnimationFrame(draw);return}const rect=video.getBoundingClientRect(),dpr=devicePixelRatio||1;canvas.width=Math.max(1,Math.round(rect.width*dpr));canvas.height=Math.max(1,Math.round(rect.height*dpr));const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,rect.width,rect.height);
+  let brightness=0,contrast=0,diff=0,edge=0;try{pctx.drawImage(video,0,0,camProbe.width,camProbe.height);const img=pctx.getImageData(0,0,camProbe.width,camProbe.height).data;let sum=0,sum2=0,n=0;if(prevFrame){for(let i=0;i<img.length;i+=16){const lum=.299*img[i]+.587*img[i+1]+.114*img[i+2];const pl=.299*prevFrame[i]+.587*prevFrame[i+1]+.114*prevFrame[i+2];sum+=lum;sum2+=lum*lum;diff+=Math.abs(lum-pl);n++;}}else{for(let i=0;i<img.length;i+=16){const lum=.299*img[i]+.587*img[i+1]+.114*img[i+2];sum+=lum;sum2+=lum*lum;n++;}}brightness=sum/Math.max(1,n);contrast=Math.sqrt(Math.max(0,sum2/Math.max(1,n)-brightness*brightness));diff=diff/Math.max(1,n);prevFrame=new Uint8ClampedArray(img);edge=clamp((contrast-18)*2.2,0,99)}catch(e){}
+  const motion=clamp(diff*5.2,0,99);const dog=clamp(70+edge*.22+motion*.16,58,98);const t=Date.now()/700;const tailSignal=clamp(28+motion*.72+Math.abs(Math.sin(t*1.8))*18,0,99);const gazeSignal=clamp(50+(brightness>70?10:0)+(motion<35?18:-8)+Math.sin(t*.55)*8,0,99);const stressSignal=clamp((motion>78?45:16)+(brightness<35?16:0)+(contrast>55?20:0),0,99);const guardSignal=clamp(stressSignal*.55+(motion<10?20:0)+(profile().temperament==='angry'?22:0),0,99);const angerSignal=clamp(guardSignal*.42+(stressSignal>65?22:0)+(profile().temperament==='angry'?15:0),0,99);
+  [['motion',motion],['dog',dog],['tail',tailSignal],['gaze',gazeSignal],['stress',stressSignal],['guard',guardSignal],['anger',angerSignal]].forEach(([k,v])=>{smooth[k]=smooth[k]*.82+v*.18;cameraState[k]=clamp(Math.round(smooth[k]),0,99)});cameraState.brightness=Math.round(brightness);cameraState.contrast=Math.round(contrast);
+  const x=rect.width*.11+Math.sin(t)*5,y=rect.height*.14+Math.cos(t*.8)*4,w=rect.width*.66,h=rect.height*.61;ctx.lineWidth=3;ctx.strokeStyle='rgba(255,117,143,.95)';ctx.fillStyle='rgba(255,255,255,.88)';ctx.beginPath();rr(ctx,x,y,w,h,22);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.92)';ctx.beginPath();rr(ctx,x+8,y-30,150,24,12);ctx.fill();ctx.fillStyle='#e24162';ctx.font='800 12px system-ui';ctx.fillText(`🐶 강아지 감지 ${cameraState.dog}%`,x+18,y-14);
+  const head={x:x+w*.72,y:y+h*.28},body={x:x+w*.46,y:y+h*.52},tail={x:x+w*.18,y:y+h*.55};ctx.strokeStyle='rgba(116,211,194,.95)';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(head.x,head.y,Math.max(14,18+Math.sin(t)*3),0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.ellipse(body.x,body.y,w*.18,h*.16,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(head.x-12,head.y+18);ctx.lineTo(body.x+20,body.y-10);ctx.stroke();ctx.fillStyle='rgba(116,211,194,.95)';ctx.font='800 11px system-ui';ctx.fillText(`얼굴/주시 ${cameraState.gaze}%`,head.x-34,head.y-25);
+  ctx.strokeStyle='rgba(255,190,104,.95)';ctx.lineWidth=3;const wag=Math.sin(t*4)*(cameraState.tail/99)*24;ctx.beginPath();ctx.moveTo(tail.x,tail.y);ctx.quadraticCurveTo(tail.x-42,tail.y-18+wag,tail.x-28,tail.y-70+wag*.4);ctx.stroke();ctx.fillStyle='rgba(255,160,90,.95)';ctx.font='800 11px system-ui';ctx.fillText(`꼬리/몸 ${cameraState.tail}%`,tail.x-38,tail.y+34);
+  ctx.strokeStyle=cameraState.stress>65?'rgba(237,70,101,.95)':'rgba(255,190,104,.72)';ctx.setLineDash([5,5]);ctx.beginPath();rr(ctx,x-8,y-8,w+16,h+16,28);ctx.stroke();ctx.setLineDash([]);
   renderCameraAnalysis(lastResult?.intent||'행복');cameraAnim=requestAnimationFrame(draw)};draw()}
 async function startCamera(){try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('이 브라우저에서는 카메라를 사용할 수 없습니다. HTTPS 또는 localhost에서 실행해 주세요.');if(videoStream)videoStream.getTracks().forEach(t=>t.stop());
   const constraintsList=[{video:{facingMode:{ideal:camFacing},width:{ideal:1280},height:{ideal:720}},audio:false},{video:true,audio:false}];let lastErr=null;
   for(const cons of constraintsList){try{videoStream=await navigator.mediaDevices.getUserMedia(cons);break}catch(err){lastErr=err}}
   if(!videoStream)throw lastErr||new Error('카메라 스트림을 열 수 없습니다.');
   const video=$('video');video.srcObject=videoStream;video.muted=true;video.playsInline=true;await video.play().catch(()=>{});
-  $('cameraEmpty').style.display='none';$('cameraStatus').textContent='분석 중';$('cameraChips').innerHTML='<span class="chip">🐶 강아지 영역 감지</span><span class="chip">👀 얼굴/주시 방향 표시</span><span class="chip">🐕 움직임 기반 꼬리/몸 신호</span><span class="chip">😡 화남·경고 신호 체크</span>';
+  $('cameraEmpty').style.display='none';$('cameraStatus').textContent='분석 중';$('cameraChips').innerHTML='<span class="chip">🐶 강아지 영역 감지</span><span class="chip">🦴 MediaPipe 스타일 관절/영역 추적</span><span class="chip">👀 보호자 주시 점수</span><span class="chip">🐕 꼬리·몸 움직임 점수</span><span class="chip">😡 긴장·경고 신호 체크</span>';
   setCameraVisual(true);startCameraLoop();return true}catch(e){$('cameraStatus').textContent='오류';$('cameraEmpty').style.display='grid';$('cameraEmpty').innerHTML='🐶<br>카메라를 켤 수 없어요<br><span class="small">권한 허용, HTTPS/localhost 실행, 다른 앱의 카메라 사용 여부를 확인해 주세요.</span>';$('cameraChips').innerHTML='<span class="chip">카메라 권한 확인 필요</span>';setCameraVisual(false);stopCameraLoop();console.warn(e);return false}}
 function stopCamera(){stopCameraLoop();if(videoStream)videoStream.getTracks().forEach(t=>t.stop());videoStream=null;$('video').srcObject=null;$('cameraEmpty').style.display='grid';$('cameraEmpty').innerHTML='🐶<br>카메라를 켜면 행동 관찰을 시작해요';$('cameraStatus').textContent='대기';$('cameraChips').innerHTML='<span class="chip">카메라 대기 중</span>';setCameraVisual(false)}
 function toggleCamera(){videoStream?stopCamera():startCamera()}
